@@ -187,6 +187,35 @@ input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--accent);
 .ibx:first-of-type { border-top: 0; }
 .ibx .inl select { flex: 1; min-width: 0; }
 .ibw { display: flex; gap: 6px; align-items: flex-start; }
+/* scheda movimento (v38) */
+#mForm { --tc: var(--bad); --tcs: var(--bad-soft); }
+#mForm[data-t="income"] { --tc: var(--accent); --tcs: var(--accent-soft); }
+#mForm[data-t="transfer"] { --tc: var(--bar); --tcs: var(--bar-soft); }
+#mForm[data-t="refund"], #mForm[data-t="loan"], #mForm[data-t="adjust"], #mForm[data-t="covered"], #mForm[data-t="space"] { --tc: var(--accent); --tcs: var(--accent-soft); }
+#mForm #mType { padding: 5px; border-radius: 16px; margin-bottom: 12px; }
+#mForm #mType button { min-height: 48px; font-weight: 700; border-radius: 12px; }
+#mForm #mType button[aria-pressed="true"] { background: var(--tcs); color: var(--tc); box-shadow: inset 0 0 0 2px var(--tc); }
+#mForm .amount-input { text-align: center; font-size: 2.5rem; min-height: 78px; color: var(--tc); background: var(--tcs); border: 2px solid color-mix(in srgb, var(--tc) 35%, transparent); border-radius: 18px; }
+#mForm .amount-input:focus { border-color: var(--tc); outline: none; }
+#mForm .amount-input::placeholder { color: var(--tc); opacity: 0.45; }
+#mForm > .field, #mForm > .grp { background: var(--surface-2); border-radius: 16px; padding: 12px 14px; margin-bottom: 10px; }
+#mForm > .field:has(#mAmount) { background: none; padding: 0; margin-bottom: 12px; }
+#mForm > .field:has(#mAmount) > label { text-align: center; display: block; color: var(--ink-3); }
+#mForm > .field:has(#mOther), #mForm > #mTplBox, #mForm > #mLastBox { background: none; padding: 0; }
+#mForm > .field input:not([type=checkbox]), #mForm > .field select, #mForm > .field textarea, #mForm > .grp input, #mForm > .grp select { background: var(--surface); }
+#mForm > .field > label:not(.switch):not(.btn), #mForm > .grp > .field > label, #mForm .lbl { font-weight: 700; color: var(--ink-2); letter-spacing: 0.01em; }
+#mForm label[for=mDesc]::before { content: "✏️ "; }
+#mForm label[for=mDate]::before { content: "📅 "; }
+#mForm label[for=mCat]::before { content: "🏷️ "; }
+#mForm label[for=mSub]::before { content: "↳ "; }
+#mForm label[for=mAcc]::before, #mForm label[for=mFrom]::before, #mForm label[for=mTo]::before { content: "🏦 "; }
+#mForm label[for=mNote]::before { content: "📝 "; }
+#mForm label[for=mFreq]::before { content: "🔁 "; }
+#mForm #mTagsLbl::before { content: "# "; }
+#mForm #g-cat { border-left: 4px solid var(--tc); }
+#mForm #g-acc, #mForm #g-xfer { border-left: 4px solid var(--bar); }
+#mForm #g-split { border-left: 4px solid var(--accent); }
+#mForm > button[type="submit"] { position: sticky; bottom: 8px; z-index: 2; min-height: 54px; font-size: 1.05rem; box-shadow: 0 8px 20px rgba(0,0,0,0.28); }
 .sbadge { display: inline-block; font-size: 0.68rem; font-weight: 800; line-height: 1; padding: 3px 5px; border-radius: 5px; background: var(--accent); color: var(--bg); vertical-align: middle; margin-left: 4px; }
 .pill { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
 .pill.acc { background: var(--accent-soft); color: var(--accent); }
@@ -1397,7 +1426,7 @@ var M = (function () {
   "use strict";
 
   /* ============ Costanti ============ */
-  var APP_VERSION = "37 (19 nov 2026, 21:45)";
+  var APP_VERSION = "38 (19 nov 2026, 22:15)";
   var KEY3 = "mie-finanze-v3", KEY2 = "mie-finanze-v2", KEY1 = "mie-finanze-v1";
   var SAFE = "Spese di sicurezza";
   var CAT_DEFAULTS = ["Spese generiche", "Trasporti", "Investimenti", "Uscite", "Viaggi", "Casa", SAFE];
@@ -3093,14 +3122,14 @@ var M = (function () {
     }
     var cur = { type: m.type, tags: (m.tagIds || []).slice() };
     var tagList = state.tags.filter(function (t) { return t.active || cur.tags.indexOf(t.id) > -1; });
-    var html = '<form id="mForm" novalidate>' +
+    var html = '<form id="mForm" novalidate data-t="' + cur.type + '">' +
       typeBarHTML(cur.type, ed) +
+      '<div class="field"><label for="mAmount">Importo (€)</label><input class="amount-input num" id="mAmount" inputmode="decimal" autocomplete="off" placeholder="0,00" value="' + esc(ed || dupSrc || tplSrc ? numStr(m.split ? m.split.total : m.amount) : "") + '"></div>' +
       '<p class="hint" id="mHelp"></p>' +
       (lastMov && feat("again") && !ed && !dupSrc && !tplSrc ? '<div class="field" id="mLastBox"><button type="button" class="chip" id="mLast">↻ Ripeti l\'ultimo: ' + esc(movTitle(lastMov)) + " " + esc(nf.format(lastMov.split ? lastMov.split.total : lastMov.amount)) + "</button></div>" : "") +
       (!ed && !dupSrc && state.templates.length ? '<div class="field" id="mTplBox"><span class="lbl">Modelli rapidi</span><div class="chips" id="mTpls">' + state.templates.map(function (t) { return '<button type="button" class="chip" data-tpl="' + esc(t.id) + '">' + esc(t.name) + "</button>"; }).join("") + "</div></div>" : "") +
       '<div class="field"><label for="mDesc">Descrizione</label><input id="mDesc" maxlength="80" autocomplete="off" placeholder="Es. Benzina, Spesa Esselunga" value="' + esc(m.desc || "") + '"></div>' +
       (ed ? "" : '<div id="mSug" aria-live="polite"></div>') +
-      '<div class="field"><label for="mAmount">Importo (€)</label><input class="amount-input num" id="mAmount" inputmode="decimal" autocomplete="off" placeholder="0,00" value="' + esc(ed || dupSrc || tplSrc ? numStr(m.split ? m.split.total : m.amount) : "") + '"></div>' +
       '<div class="field"><label for="mDate">Data</label><input id="mDate" type="date" value="' + esc(m.date) + '"></div>' +
       '<div class="grp" id="g-cat"><div class="field"><label for="mCat">Categoria</label><select id="mCat">' + optionsHTML(smartSort(catItems(m.catId), "catId"), m.catId, "Scegli la categoria") + "</select></div>" +
       '<div class="field"><label for="mSub">Sottocategoria</label><select id="mSub">' + optionsHTML(m.catId ? subItems(m.catId, m.subId) : [], m.subId, "Nessuna sottocategoria") + "</select></div></div>" +
@@ -3635,8 +3664,8 @@ var M = (function () {
   var TB_MAIN = ["expense", "income", "transfer"];
   function typeBarHTML(sel, ed) {
     var oo = otherOpts(ed), isOther = TB_MAIN.indexOf(sel) < 0;
-    var b = [["expense", "Spesa"], ["income", "Entrata"]];
-    if (feat("xfer")) b.push(["transfer", "Sposta"]);
+    var b = [["expense", "↓ Spesa"], ["income", "↑ Entrata"]];
+    if (feat("xfer")) b.push(["transfer", "⇄ Sposta"]);
     var h = '<div class="seg" id="mType" role="group" aria-label="Tipo di movimento">' + b.map(function (x) { return '<button type="button" data-t="' + x[0] + '" aria-pressed="' + (sel === x[0]) + '">' + x[1] + "</button>"; }).join("");
     if (oo.length) h += '<button type="button" data-t="other" aria-pressed="' + isOther + '">Altro ▾</button>';
     h += "</div>";
@@ -3646,6 +3675,7 @@ var M = (function () {
   function syncTypeBar(t) {
     var isOther = TB_MAIN.indexOf(t) < 0;
     Array.prototype.forEach.call(document.querySelectorAll("#mType button"), function (b) { b.setAttribute("aria-pressed", (b.dataset.t === "other" ? isOther : b.dataset.t === t) ? "true" : "false"); });
+    var fm = $("mForm"); if (fm) fm.dataset.t = t;
     var bx = $("mOtherBox"); if (bx) { bx.hidden = !isOther; if (isOther && $("mOther")) $("mOther").value = t; }
   }
   function bindTypeBar(fn) {
