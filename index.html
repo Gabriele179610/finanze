@@ -1132,7 +1132,7 @@ var M = (function () {
   function fundParts(s, catId, cut) {
     var c = byId(s.categories, catId);
     var opening = c ? (+c.fundOpening || 0) : 0, alloc = 0, ev = 0, net = 0;
-    Object.keys(s.budgets).forEach(function (k) { if (k <= cut.mk) { var v = s.budgets[k].alloc[catId]; if (v) alloc += v; } });
+    Object.keys(s.budgets).forEach(function (k) { if (k <= cut.mk && s.budgets[k].applied !== false) { var v = s.budgets[k].alloc[catId]; if (v) alloc += v; } });
     (s.fundEvents || []).forEach(function (e) { if (e.catId === catId && e.date <= cut.date) ev += e.amount; });
     s.movements.forEach(function (m) {
       if (m.catId !== catId || m.date > cut.date) return;
@@ -1146,7 +1146,7 @@ var M = (function () {
   // saldo precedente + nuove allocazioni - spesa netta = nuovo saldo, per un mese
   function fundMonth(s, catId, mk) {
     var prev = fundEOM(s, catId, prevMonthKey(mk)).balance;
-    var b = s.budgets[mk], planned = b && b.alloc[catId] ? b.alloc[catId] : 0, ev = 0, net = 0;
+    var b = s.budgets[mk], planned = b && b.applied !== false && b.alloc[catId] ? b.alloc[catId] : 0, ev = 0, net = 0;
     (s.fundEvents || []).forEach(function (e) { if (e.catId === catId && e.date.slice(0, 7) === mk) ev += e.amount; });
     s.movements.forEach(function (m) {
       if (m.catId !== catId) return;
@@ -1391,7 +1391,7 @@ var M = (function () {
   "use strict";
 
   /* ============ Costanti ============ */
-  var APP_VERSION = "34 (19 nov 2026, 12:00)";
+  var APP_VERSION = "35 (19 nov 2026, 09:30)";
   var KEY3 = "mie-finanze-v3", KEY2 = "mie-finanze-v2", KEY1 = "mie-finanze-v1";
   var SAFE = "Spese di sicurezza";
   var CAT_DEFAULTS = ["Spese generiche", "Trasporti", "Investimenti", "Uscite", "Viaggi", "Casa", SAFE];
@@ -1822,7 +1822,7 @@ var M = (function () {
     openSheet("Chiusura di " + longMonth(view), h, function () {
       var bt = $("clPrep"); if (!bt) return;
       bt.addEventListener("click", function () {
-        state.budgets[nk] = { planned: src.planned, alloc: clone(src.alloc) };
+        state.budgets[nk] = { planned: src.planned, alloc: clone(src.alloc), applied: false };
         view = new Date(+nk.slice(0, 4), +nk.slice(5) - 1, 1);
         save(); closeSheet(); renderAll(); toast("Budget pronto");
       });
@@ -2108,6 +2108,7 @@ var M = (function () {
       h += "</div>";
 
       h = h.replace(/<\/div>$/, '<button class="btn ghost small" type="button" data-close="1">Chiusura del mese</button></div>');
+      h += applyHTML(b, mk, rec);
       var cats = state.categories.filter(function (c) { return c.active || b.alloc[c.id] > 0 || Math.abs(nets[c.id] || 0) > 0.004; });
       var totNet = 0;
       h += '<div class="card"><div><h2>Per categoria</h2><p class="small muted">Differenza = budget − spesa netta (spese meno rimborsi; le spese spalmate contano a quote mensili). Tocca il nome per vedere le sottocategorie.</p></div>';
@@ -2128,9 +2129,52 @@ var M = (function () {
       var tn = r2(totNet), td = r2(al - tn);
       h += '<div class="brow"><div class="bhead"><b>Totale</b><b class="num">' + nf.format(al) + '</b></div><div class="bnums"><div><span class="label">Spesa netta</span><b class="num">' + nf.format(tn) + '</b></div><div><span class="label">Differenza</span><b class="num ' + diffClass(td) + '">' + sgn(td) + '</b></div><div><span class="label">Usato</span><b class="num">' + (al > 0 ? Math.round((tn / al) * 100) + "%" : "—") + "</b></div></div></div></div>";
     }
+    return h + yearHTML();
+  }
+  function applyHTML(b, mk, rec) {
+    var ap = b.applied !== false, rc = M.reconcile(state, todayISO()), h = '<div class="card"><h2>Allocazione ai fondi</h2>';
+    if (ap) {
+      h += '<p class="hint"><b>Fatta.</b> Le cifre di questo mese sono già dentro i fondi.</p>' +
+        '<div class="kv"><span>Da allocare (conti − fondi)</span><b class="num ' + (Math.abs(rc.diff) < 0.005 ? "pos" : "") + '">' + nf.format(rc.diff) + "</b></div>" +
+        '<p class="small muted">' + (Math.abs(rc.diff) < 0.005 ? "Fondi e conti sono allineati." : "Per allinearli, correggi le cifre di questo mese oppure usa «Alloca denaro» nei Fondi.") + '</p>' +
+        '<button class="btn ghost small" type="button" data-bud="unapply">Togli dai fondi (torna previsione)</button>';
+    } else {
+      h += '<p class="hint">Questo mese è ancora una <b>previsione</b>: non muove i fondi.' + (rec > 0 ? " Lo stipendio è arrivato (" + nf.format(rec) + "): quando premi il bottone uso questa cifra e adatto le categorie in proporzione. Poi puoi correggerle a mano." : " Quando arriva lo stipendio premi il bottone: userò la cifra ricevuta.") + "</p>" +
+        '<button class="btn" type="button" data-bud="apply">Alloca ai fondi</button>';
+    }
+    return h + "</div>";
+  }
+  var yrArm = false;
+  function yearHTML() {
+    var y0 = +todayISO().slice(0, 4), mk = monthKey(view), b = state.budgets[mk] || latestBudgetBefore(M.addMonthKey(mk, 1)), cur = todayISO().slice(0, 7);
+    var h = '<div class="card"><h2>Previsione per tutto l\'anno</h2><p class="small muted">Scegli uno stipendio ipotetico: creo i budget dei mesi che mancano con le stesse proporzioni' + (b ? " di quelli di " + esc(longMonth(new Date(+(state.budgets[mk] ? mk : latestKey(mk)).slice(0, 4), +(state.budgets[mk] ? mk : latestKey(mk)).slice(5) - 1, 1))) : "") + '. Restano <b>previsioni</b>: i fondi si muovono solo quando alloco il mese. Poi puoi modificare ogni mese a mano.</p>';
+    h += '<div class="field"><label for="yrPlan">Stipendio ipotizzato (€)</label><input id="yrPlan" class="num" inputmode="decimal" value="' + (b ? numStr(b.planned) : "") + '"></div>' +
+      '<div class="field"><label for="yrYear">Anno</label><select id="yrYear"><option value="' + y0 + '">' + y0 + '</option><option value="' + (y0 + 1) + '">' + (y0 + 1) + "</option></select></div>" +
+      '<p class="err" id="yrErr" role="alert"></p>' +
+      '<button class="btn" type="button" data-bud="yr:new">Crea i mesi mancanti</button>' +
+      '<button class="btn ghost" type="button" data-bud="yr:over">' + (yrArm ? "Tocca ancora: sostituisco le previsioni" : "Rifai tutte le previsioni non ancora allocate") + "</button>" +
+      '<p class="hint">I mesi già allocati ai fondi e quelli passati non vengono toccati.</p></div>';
     return h;
   }
-
+  function latestKey(mk) { var keys = Object.keys(state.budgets).filter(function (k) { return k < mk; }).sort(); return keys.length ? keys[keys.length - 1] : mk; }
+  function yearAction(kind) {
+    var v = parseAmount($("yrPlan").value), y = +$("yrYear").value, mk = monthKey(view), cur = todayISO().slice(0, 7);
+    var src = state.budgets[mk] || latestBudgetBefore(M.addMonthKey(mk, 1)) || null;
+    if (!(v > 0)) { $("yrErr").textContent = "Inserisci lo stipendio ipotizzato."; return; }
+    if (kind === "over" && !yrArm) { yrArm = true; renderAll(); return; }
+    yrArm = false;
+    var n = 0, f = src && src.planned > 0 ? v / src.planned : 1;
+    for (var m = 1; m <= 12; m++) {
+      var k = y + "-" + ("0" + m).slice(-2); if (k < cur) continue;
+      var ex = state.budgets[k];
+      if (ex && (kind === "new" || ex.applied !== false)) continue;
+      var nb = { planned: v, alloc: {}, applied: false };
+      if (src) Object.keys(src.alloc).forEach(function (c) { nb.alloc[c] = r2((src.alloc[c] || 0) * f); });
+      if (src) spreadResidual(nb);
+      state.budgets[k] = nb; n++;
+    }
+    save(); renderAll(); toast(n ? plural(n, "mese preparato", "mesi preparati") : "Nessun mese da preparare");
+  }
   function fundsHTML() {
     var mk = monthKey(view), today = todayISO(), h = "";
     h += '<div class="card"><div><h2>Riconciliazione</h2><p class="small muted">Confronta i soldi sui conti attivi con quelli assegnati ai fondi. L\'obiettivo è una differenza di 0 €.</p></div>' + reconBlock(true) +
@@ -2655,9 +2699,9 @@ var M = (function () {
     var bal = balances(), h = "";
     if (cloudOn && cl.auth && sp.cur === "p") h += accountSection();
     h += accd("sp", "Spazi", curSpName(), spacesHTML());
+    h += accd("trash", "Cestino", plural((state.trash || []).length, "movimento", "movimenti"), trashHTML());
     if (feat("receipts")) h += accd("ded", "Detraibili e scontrini", plural(dedList(dedY || todayISO().slice(0, 4)).length, "spesa", "spese") + " nel " + (dedY || todayISO().slice(0, 4)), dedHTML());
     h += accd("home", "Schermata iniziale", plural(homeCfg().order.filter(function (k) { return homeCfg().on[k]; }).length, "blocco", "blocchi") + " attivi", homeCfgHTML());
-    h += accd("trash", "Cestino", plural((state.trash || []).length, "movimento", "movimenti"), trashHTML());
     var catBody = '<p class="small muted">Ogni categoria ha anche un fondo (con un saldo iniziale). Ogni sottocategoria appartiene a una categoria. Tocca una categoria per vedere le sue sottocategorie.</p>' + state.categories.map(function (c) {
       var subs = subsOf(c.id), k = "c:" + c.id;
       return '<details class="subacc" data-k="' + k + '"' + (setOpen[k] ? " open" : "") + '><summary><span class="st"><b' + (c.active ? "" : ' class="dim"') + ">" + esc(c.name) + (c.active ? "" : ' <span class="pill">Disattivata</span>') + '</b><span class="small muted">' + subs.length + (subs.length === 1 ? " sottocategoria" : " sottocategorie") + " · fondo " + bm(fundBal(c.id)) + '</span></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody">' +
@@ -4964,7 +5008,7 @@ var M = (function () {
             var old = state.budgets[mk] && state.budgets[mk].alloc[bc.id] || 0;
             changes.push(mk + " · " + bc.name + ": " + nf.format(old) + " → " + nf.format(av));
             ops.push(function () {
-              if (!state.budgets[mk]) { state.budgets[mk] = { planned: 0, alloc: {} }; newBud[mk] = true; }
+              if (!state.budgets[mk]) { state.budgets[mk] = { planned: 0, alloc: {} }; if (mk >= todayISO().slice(0, 7)) state.budgets[mk].applied = false; newBud[mk] = true; }
               state.budgets[mk].alloc[bc.id] = av;
               if (pv !== null && pv > 0) { state.budgets[mk].planned = pv; plannedSet[mk] = true; }
             });
@@ -5137,13 +5181,20 @@ var M = (function () {
   });
   function budgetAction(kind) {
     var mk = monthKey(view), b = state.budgets[mk];
+    if (kind === "yr:new" || kind === "yr:over") { yearAction(kind.slice(3)); return; }
+    if (kind === "apply" && b) {
+      var rcv = receivedSalary(mk);
+      if (rcv > 0 && Math.abs(rcv - b.planned) >= 0.005) { b.planned = rcv; if (allocated(b) > 0) spreadResidual(b); }
+      b.applied = true; save(); renderAll(); toast("Allocato ai fondi"); return;
+    }
+    if (kind === "unapply" && b) { b.applied = false; save(); renderAll(); toast("Tornato a previsione"); return; }
     if (kind === "create") {
       var v = parseAmount($("bNewPlan").value);
       if (!(v > 0)) { $("bErr").textContent = "Inserisci lo stipendio previsto, per esempio 1850."; return; }
-      state.budgets[mk] = { planned: v, alloc: {} };
+      state.budgets[mk] = { planned: v, alloc: {}, applied: false };
     } else if (kind === "copy") {
       var prev = latestBudgetBefore(mk); if (!prev) return;
-      state.budgets[mk] = { planned: prev.planned, alloc: clone(prev.alloc) };
+      state.budgets[mk] = { planned: prev.planned, alloc: clone(prev.alloc), applied: false };
     } else if (kind === "align" && b) {
       b.planned = receivedSalary(mk);
     } else if (kind === "spread" && b) {
