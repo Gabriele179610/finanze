@@ -182,6 +182,7 @@ input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--accent);
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink-2); font: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
 .chip[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+.sbadge { display: inline-block; font-size: 0.68rem; font-weight: 800; line-height: 1; padding: 3px 5px; border-radius: 5px; background: var(--accent); color: var(--bg); vertical-align: middle; margin-left: 4px; }
 .pill { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
 .pill.acc { background: var(--accent-soft); color: var(--accent); }
 .badge { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; margin-left: 8px; border-radius: 10px; background: var(--accent); color: var(--accent-ink); font-size: 0.75rem; }
@@ -1391,7 +1392,7 @@ var M = (function () {
   "use strict";
 
   /* ============ Costanti ============ */
-  var APP_VERSION = "35 (19 nov 2026, 09:30)";
+  var APP_VERSION = "36 (19 nov 2026, 14:00)";
   var KEY3 = "mie-finanze-v3", KEY2 = "mie-finanze-v2", KEY1 = "mie-finanze-v1";
   var SAFE = "Spese di sicurezza";
   var CAT_DEFAULTS = ["Spese generiche", "Trasporti", "Investimenti", "Uscite", "Viaggi", "Casa", SAFE];
@@ -1634,6 +1635,15 @@ var M = (function () {
     s.loans.forEach(function (l) { l.amount = +l.amount || 0; l.due = l.due || ""; l.note = l.note || ""; l.initialMovId = l.initialMovId || ""; if (!Array.isArray(l.repayments)) l.repayments = []; });
     s.movements.forEach(function (m) { if (!Array.isArray(m.tagIds)) m.tagIds = []; m.amount = +m.amount || 0; });
     if (!s.accounts.length) s.accounts.push({ id: uid(), name: "Conto principale", type: "Conto corrente", opening: 0, active: true });
+    s.groups.forEach(function (g) {
+      if (!g.gl) return;
+      var ks = Object.keys(g.mem || {}), q = ks.length === 2 ? s.persons.filter(function (x) { return x.uid && g.mem[x.uid]; })[0] : null;
+      if (q && !q.gl) {
+        q.gl = g.gl; if (g.skip) q.skip = g.skip;
+        s.movements.forEach(function (m) { if (m.gl === g.id) m.gl = q.id; });
+      }
+      delete g.gl; delete g.mem; delete g.skip;
+    });
     M.syncLoans(s);
     return s;
   }
@@ -3097,7 +3107,7 @@ var M = (function () {
       '<div class="field" id="g-split"><label class="switch"><input type="checkbox" id="spOn"' + (m.split ? " checked" : "") + '><span>Dividi con altre persone</span></label><div id="spBox" hidden>' +
         '<div class="field"><label for="spPayer">Chi ha pagato</label><select id="spPayer"></select></div>' +
         '<div class="field"><label for="spGroup">Gruppo (facoltativo)</label><select id="spGroup"></select></div>' +
-        '<div class="field"><span class="lbl">Con chi dividi</span><div class="chips" id="spPeople"></div><div class="inl"><input id="spNew" maxlength="30" placeholder="Nuova persona" autocomplete="off"><button class="btn ghost small" type="button" id="spNewOk">Aggiungi</button></div></div>' +
+        '<div class="field"><span class="lbl">Con chi dividi</span><div class="chips" id="spPeople"></div><div class="inl"><input id="spNew" maxlength="30" placeholder="Nuova persona" autocomplete="off"><button class="btn ghost small" type="button" id="spNewOk">Aggiungi</button></div><input id="spMail" type="email" inputmode="email" autocapitalize="none" placeholder="Email del suo account (se ce l\'ha)" autocomplete="off" style="margin-top:6px"></div>' +
         '<div class="field"><label for="spMode">Come dividere</label><select id="spMode"></select></div><div id="spRows"></div><p class="hint" id="spSum"></p></div></div>' +
       '<div class="field" id="g-acc"><label for="mAcc">Conto</label><select id="mAcc">' + optionsHTML(smartSort(accItems(m.accountId), "accountId"), m.accountId) + "</select></div>" +
       '<div class="grp" id="g-xfer"><div class="field"><label for="mFrom">Dal conto</label><select id="mFrom">' + optionsHTML(accItems(m.accountId), m.accountId) + '</select></div><div class="field"><label for="mTo">Al conto</label><select id="mTo">' + optionsHTML(accItems(m.toAccountId), m.toAccountId) + "</select></div></div>" +
@@ -3184,7 +3194,7 @@ var M = (function () {
         $("spGroup").innerHTML = '<option value="">Nessun gruppo</option>' + state.groups.filter(function (g) { return !g.closed || g.id === sp.group; }).map(function (g) { return '<option value="' + esc(g.id) + '">' + esc(g.name) + "</option>"; }).join(""); $("spGroup").value = sp.group;
         sp.sel = sp.sel.filter(function (id) { return id !== sp.payer && byId(P, id); });
         var ppl = P.filter(function (q) { return q.id !== sp.payer; });
-        $("spPeople").innerHTML = ppl.length ? ppl.map(function (q) { return '<button type="button" class="chip" data-sppl="' + esc(q.id) + '" aria-pressed="' + (sp.sel.indexOf(q.id) > -1) + '">' + esc(q.name) + "</button>"; }).join("") : '<span class="small muted">Nessuna persona: aggiungila qui sotto.</span>';
+        $("spPeople").innerHTML = ppl.length ? ppl.map(function (q) { return '<button type="button" class="chip" data-sppl="' + esc(q.id) + '" aria-pressed="' + (sp.sel.indexOf(q.id) > -1) + '">' + esc(q.name) + pBadge(q) + "</button>"; }).join("") : '<span class="small muted">Nessuna persona: aggiungila qui sotto.</span>';
         var modes = me ? [["equal", "Parti uguali"], ["all", "Tutto agli altri (per te zero)"], ["pct", "Percentuali agli altri"], ["amt", "Importi agli altri"]] : [["equal", "Parti uguali"], ["all", "Tutto a mio carico"], ["pct", "Una mia percentuale"], ["amt", "Un mio importo"]];
         $("spMode").innerHTML = modes.map(function (o) { return '<option value="' + o[0] + '">' + o[1] + "</option>"; }).join(""); $("spMode").value = sp.mode;
         var rows = "", unit = sp.mode === "pct" ? "%" : "€";
@@ -3256,7 +3266,7 @@ var M = (function () {
         if (b) { spRead(); var q = b.dataset.sppl, i = sp.sel.indexOf(q); if (i > -1) sp.sel.splice(i, 1); else sp.sel.push(q); spRender(); return; }
         if (ev.target.closest("#spNewOk")) {
           var np = newPerson($("spNew").value); if (!np) return;
-          $("spNew").value = ""; save(); spRead();
+          $("spNew").value = ""; save(); spRead(); glNewAcct(np, $("spMail"), function () { spRender(); });
           if (np.id !== sp.payer && sp.sel.indexOf(np.id) < 0) sp.sel.push(np.id);
           spRender();
         }
@@ -3781,8 +3791,8 @@ var M = (function () {
   function deleteMovement(id) {
     var m = byId(state.movements, id); if (!m) return "";
     unmirror(m);
-    if (m.gl) { var gg = byId(state.groups, m.gl); if (gg) { if (!gg.skip) gg.skip = {}; gg.skip[m.gi] = 1; } }
-    else if ((m.split && m.split.groupId) || m.groupId) { if (!state.glDel) state.glDel = []; state.glDel.push(m.id); if (state.glDel.length > 300) state.glDel.shift(); }
+    if (m.gl) { var gg = byId(state.persons, m.gl); if (gg) { if (!gg.skip) gg.skip = {}; gg.skip[m.gi] = 1; } }
+    else if (m.split || m.type === "settle") { if (!state.glDel) state.glDel = []; state.glDel.push(m.id); if (state.glDel.length > 300) state.glDel.shift(); }
     if (!state.trash) state.trash = [];
     var e = { id: uid(), at: todayISO(), mov: clone(m) }; state.trash.push(e);
     state.movements = state.movements.filter(function (x) { return x.id !== id; });
@@ -4361,9 +4371,9 @@ var M = (function () {
     var h = '<div class="card"><div class="kv"><span>Ti devono</span><b class="num pos">' + bm(r2(cr)) + '</b></div><div class="kv"><span>Devi</span><b class="num neg">' + bm(r2(db)) + "</b></div></div>";
     var pbody = (state.persons.length ? '<div class="list">' + state.persons.map(function (q) {
       var o = tt[q.id] || ZERO_T, v = o.net, br = pbreak(o);
-      return '<div class="item" role="button" tabindex="0" data-pers="' + esc(q.id) + '"><div class="main"><span class="t">' + esc(q.name) + (q.def ? ' <span class="pill acc">predefinita</span>' : "") + '</span><span class="s">' + esc(balText(v, q.name)) + (br && !hideOn() ? " — " + esc(br) : "") + '</span></div><span class="a num' + (v > 0.004 ? " in" : "") + '">' + (Math.abs(v) < 0.005 ? "" : (hideOn() ? MASK : sgn(v))) + "</span></div>";
+      return '<div class="item" role="button" tabindex="0" data-pers="' + esc(q.id) + '"><div class="main"><span class="t">' + esc(q.name) + pBadge(q) + (q.def ? ' <span class="pill acc">predefinita</span>' : "") + '</span><span class="s">' + esc(balText(v, q.name)) + (br && !hideOn() ? " — " + esc(br) : "") + '</span></div><span class="a num' + (v > 0.004 ? " in" : "") + '">' + (Math.abs(v) < 0.005 ? "" : (hideOn() ? MASK : sgn(v))) + "</span></div>";
     }).join("") + "</div>" : '<p class="empty">Nessuna persona. Aggiungine una per dividere le spese.</p>') +
-      '<div class="inl"><input id="pNewName" maxlength="30" placeholder="Nuova persona" autocomplete="off"><button class="btn small" type="button" id="pNewOk">Aggiungi</button></div>';
+      '<div class="inl"><input id="pNewName" maxlength="30" placeholder="Nuova persona" autocomplete="off"><button class="btn small" type="button" id="pNewOk">Aggiungi</button></div><input id="pMail" type="email" inputmode="email" autocapitalize="none" placeholder="Email del suo account (se ce l\'ha)" autocomplete="off" style="margin-top:6px">';
     var openG = state.groups.filter(function (g) { return !g.closed; }), closedG = state.groups.filter(function (g) { return g.closed; });
     var gbody = (openG.length ? '<div class="list">' + openG.map(groupItem).join("") + "</div>" : '<p class="empty">Nessun gruppo aperto. Usali per una vacanza, una cena di gruppo, un evento. Puoi anche trasformare un tag in gruppo dalla sua scheda.</p>') +
       (closedG.length ? '<details class="subacc" data-k="grc"' + (setOpen.grc ? " open" : "") + '><summary><span class="st"><b>Gruppi chiusi (' + closedG.length + ')</b></span><span class="chv" aria-hidden="true"></span></summary><div class="list">' + closedG.map(groupItem).join("") + "</div></details>" : "") +
@@ -4413,10 +4423,11 @@ var M = (function () {
       '<div class="ft-loans"><h3>Prestiti</h3>' + (lns.length ? '<div class="list">' + lns.map(loanItemSimple).join("") + "</div>" : '<p class="small muted">Nessun prestito con questa persona.</p>') +
       '<button class="btn ghost small" type="button" id="pLoan">Nuovo prestito con ' + esc(q.name) + "</button></div>" +
       "<h3>Movimenti</h3>" + (list.length ? '<div class="list">' + list.slice(0, 20).map(movItem).join("") + "</div>" : '<p class="empty">Nessun movimento con questa persona.</p>') +
-      '<form id="pForm" novalidate><div class="field"><label for="pName">Nome</label><input id="pName" maxlength="30" value="' + esc(q.name) + '"></div>' +
+      glPersonHTML(q) + '<form id="pForm" novalidate><div class="field"><label for="pName">Nome</label><input id="pName" maxlength="30" value="' + esc(q.name) + '"></div>' +
       '<label class="switch"><input type="checkbox" id="pDef"' + (q.def ? " checked" : "") + "><span>Persona predefinita (la propongo per prima)</span></label>" +
       '<p class="err" id="pErr" role="alert"></p><button class="btn ghost" type="submit">Salva</button><button class="btn danger" type="button" id="pDel">Elimina persona</button></form>';
     openSheet(q.name, html, function () {
+      glPersonWire(q);
       $("pSettle").addEventListener("click", function () { openSettle(pid, null, null); });
       if ($("pAbb")) $("pAbb").addEventListener("click", function () { openAbb({ kind: "split", pid: pid }, o.split); });
       $("pLoan").addEventListener("click", function () { newLoan("credit", pid); });
@@ -4582,16 +4593,15 @@ var M = (function () {
       if (!ids.length && nm && !g.closed) head += '<p class="hint">Tutti i saldi sono a zero: puoi chiudere il gruppo.</p>';
       head += '<button class="btn ghost" type="button" id="grpClose">' + (g.closed ? "Riapri il gruppo" : "Chiudi il gruppo") + "</button>" + (g.closed ? '<p class="hint">Gruppo chiuso: il suo tag non si sceglie più nei nuovi movimenti, ma resta nelle statistiche.</p>' : '<p class="hint">Chiudendo il gruppo, anche il suo tag non si potrà più scegliere nei nuovi movimenti (resta per le statistiche).</p>');
     }
-    if (g) head += glHTML(g);
     var html = head + '<form id="grpForm" novalidate><div class="field"><label for="grpName">Nome del gruppo</label><input id="grpName" maxlength="40" placeholder="Es. Vacanza Sardegna" autocomplete="off" value="' + esc(g ? g.name : "") + '"></div>' +
       '<div class="field"><label for="grpDue">Scadenza per i saldi (facoltativa)</label><input id="grpDue" type="date" value="' + esc(g && g.due ? g.due : "") + '"></div>' +
-      '<div class="field"><span class="lbl">Partecipanti (tu ci sei sempre)</span><div class="chips" id="grpPeople"></div><div class="inl"><input id="grpNew" maxlength="30" placeholder="Nuova persona" autocomplete="off"><button class="btn ghost small" type="button" id="grpNewOk">Aggiungi</button></div></div>' +
+      '<div class="field"><span class="lbl">Partecipanti (tu ci sei sempre)</span><div class="chips" id="grpPeople"></div><div class="inl"><input id="grpNew" maxlength="30" placeholder="Nuova persona" autocomplete="off"><button class="btn ghost small" type="button" id="grpNewOk">Aggiungi</button></div><input id="grpMail" type="email" inputmode="email" autocapitalize="none" placeholder="Email del suo account (se ce l\'ha)" autocomplete="off" style="margin-top:6px"></div>' +
       '<p class="err" id="grpErr" role="alert"></p><button class="btn" type="submit">' + (g ? "Salva gruppo" : "Crea gruppo") + "</button>" + (g ? '<button class="btn danger" type="button" id="grpDel">Elimina gruppo</button>' : "") + "</form>";
     openSheet(g ? g.name : "Nuovo gruppo", html, function () {
-      function chips() { $("grpPeople").innerHTML = state.persons.length ? state.persons.map(function (q) { return '<button type="button" class="chip" data-gp="' + esc(q.id) + '" aria-pressed="' + (sel.indexOf(q.id) > -1) + '">' + esc(q.name) + "</button>"; }).join("") : '<span class="small muted">Nessuna persona: aggiungila qui sotto.</span>'; }
+      function chips() { $("grpPeople").innerHTML = state.persons.length ? state.persons.map(function (q) { return '<button type="button" class="chip" data-gp="' + esc(q.id) + '" aria-pressed="' + (sel.indexOf(q.id) > -1) + '">' + esc(q.name) + pBadge(q) + "</button>"; }).join("") : '<span class="small muted">Nessuna persona: aggiungila qui sotto.</span>'; }
       chips();
       $("grpPeople").addEventListener("click", function (ev) { var b = ev.target.closest("[data-gp]"); if (!b) return; var i = sel.indexOf(b.dataset.gp); if (i > -1) sel.splice(i, 1); else sel.push(b.dataset.gp); chips(); });
-      $("grpNewOk").addEventListener("click", function () { var np = newPerson($("grpNew").value); if (!np) return; $("grpNew").value = ""; if (sel.indexOf(np.id) < 0) sel.push(np.id); save(); chips(); });
+      $("grpNewOk").addEventListener("click", function () { var np = newPerson($("grpNew").value); if (!np) return; $("grpNew").value = ""; glNewAcct(np, $("grpMail"), chips); if (sel.indexOf(np.id) < 0) sel.push(np.id); save(); chips(); });
       $("grpForm").addEventListener("submit", function (ev) {
         ev.preventDefault();
         var nm2 = $("grpName").value.trim().slice(0, 40), due = $("grpDue").value;
@@ -4602,7 +4612,6 @@ var M = (function () {
         save(); closeSheet(); renderAll(); toast(g ? "Gruppo salvato" : "Gruppo creato");
       });
       if (g) {
-        glWire(g);
         $("grpSettle").addEventListener("click", function () { openSettle(null, g.id, null); });
         $("grpReceipt").addEventListener("click", function () { shareText(groupReceipt(g, bal)); });
         Array.prototype.forEach.call(document.querySelectorAll("[data-gmsg]"), function (b) { b.addEventListener("click", function () { shareText(groupMsg(g, b.dataset.gmsg, bal)); }); });
@@ -5129,7 +5138,7 @@ var M = (function () {
     var pe = t.closest("[data-pers]"); if (pe) { openPerson(pe.dataset.pers); return; }
     var gr = t.closest("[data-grp]"); if (gr) { openGroup(gr.dataset.grp); return; }
     if (t.closest("[data-newg]")) { openGroup(null); return; }
-    if (t.closest("#pNewOk")) { var npp = newPerson($("pNewName").value); if (npp) { save(); renderAll(); toast("Persona aggiunta"); } return; }
+    if (t.closest("#pNewOk")) { var npp = newPerson($("pNewName").value); if (npp) { save(); glNewAcct(npp, $("pMail")); renderAll(); toast("Persona aggiunta"); } return; }
     var tpc = t.closest("[data-tpl]"); if (tpc) { openMovement(null, null, null, tpc.dataset.tpl); return; }
     var tpe = t.closest("[data-tpledit]"); if (tpe) { openTpl(tpe.dataset.tpledit); return; }
     var fgi = t.closest("[data-fixign]"); if (fgi) { state.fixIgnored[fgi.dataset.fixign] = true; save(); renderAll(); return; }
@@ -5677,12 +5686,12 @@ var M = (function () {
       var have = {}; sp.list.forEach(function (x) { if (x.remote) have[x.remote] = x; });
       r.json.forEach(function (s) { if (have[s.id] && have[s.id].name !== s.name) { have[s.id].name = s.name; spSave(); renderSpaceBar(); } });
       Object.keys(have).forEach(function (k) { if (!r.json.some(function (s) { return s.id === k; })) shGone(have[k]); });
-      if (sp.cur === "p") state.groups.forEach(function (g) { if (g.gl) glKnown[g.gl] = 1; });
+      if (sp.cur === "p") state.persons.forEach(function (q) { if (q.gl) glKnown[q.gl] = 1; });
       var news = r.json.filter(function (s) { return !have[s.id] && !glKnown[s.id]; });
       return Promise.all(news.map(function (s) {
         return api("GET", "/rest/v1/shared_state?select=data,rev&space_id=eq." + s.id, null, tk).then(function (q) {
           var row = q.json && q.json[0]; if (!row) return;
-          if (row.data && row.data.kind === "group") return glIncoming(s, row, tk);
+          if (row.data && (row.data.kind === "group" || row.data.kind === "pair")) return glIncoming(s, row, tk);
           var id = uid(), norm = normalize(clone(row.data)), str = JSON.stringify(norm);
           try { localStorage.setItem(SPP + id, str); } catch (e) { return; }
           sp.list.push({ id: id, name: s.name, remote: s.id, rev: row.rev, h: hashStr(str) }); jset(SHB + id, norm); spSave(); renderSpaceBar();
@@ -5756,125 +5765,116 @@ var M = (function () {
       return api("POST", "/rest/v1/rpc/remove_space_member", { p_space: e.remote, p_user: cl.auth.uid }, t);
     }); }).catch(function () {});
   }
-  /* ============ Gruppi con account (v34) ============ */
+  /* ============ Persone con account (v36) ============ */
   var glT = null, glBusy = false, glQuiet = false, glKnown = {};
   function glOn() { return !!(cloudOn && cl.auth && sp.cur === "p"); }
-  function glAny() { return sp.cur === "p" && state.groups.some(function (g) { return g.gl; }); }
+  function glAny() { return sp.cur === "p" && state.persons.some(function (q) { return q.gl; }); }
   function glSchedule() { if (glQuiet || !glOn() || !glAny()) return; clearTimeout(glT); glT = setTimeout(function () { glRunAll(false); }, 2500); }
-  function glNameOf(g, u) {
-    var mail = g.mem && g.mem[u] ? String(g.mem[u]).split("@")[0] : "Amico";
-    return mail.charAt(0).toUpperCase() + mail.slice(1, 30);
-  }
-  function glPerson(g, u) {
-    var q = state.persons.filter(function (x) { return x.uid === u; })[0];
-    if (!q) {
-      var nm = glNameOf(g, u);
-      q = state.persons.filter(function (x) { return !x.uid && x.name.toLowerCase() === nm.toLowerCase(); })[0];
-      if (q) q.uid = u;
-      else { q = { id: uid(), name: nm, def: !state.persons.length, uid: u }; state.persons.push(q); }
-    }
-    if (g.pids.indexOf(q.id) < 0) g.pids.push(q.id);
-    return q.id;
-  }
-  function glSig(it) { return JSON.stringify([it.k, it.d, it.x, it.t, it.a, it.p, it.from, it.to, it.parts]); }
-  function glItemOf(m, g, me) {
-    if (m.gl) return null;
-    function pu(pid) { var q = byId(state.persons, pid); return q && q.uid ? q.uid : ""; }
-    if (m.type === "expense" && m.split && m.split.groupId === g.id) {
-      var s = m.split, it = { id: m.id, k: "e", d: m.date, x: m.desc || "", t: s.total, by: me, parts: [] };
+  function glNameOf(mail) { var m = mail ? String(mail).split("@")[0] : "Amico"; return m.charAt(0).toUpperCase() + m.slice(1, 30); }
+  function glSig(it) { return JSON.stringify([it.k, it.d, it.x, it.t, it.a, it.p, it.from, it.to, it.parts, it.gn || ""]); }
+  function glItemOf(m, q, me) {
+    if (m.gl || !q.uid) return null;
+    var gid = m.split && m.split.groupId ? m.split.groupId : (m.groupId || ""), gn = gid ? groupName(gid) : "", it = null;
+    if (m.type === "expense" && m.split) {
+      var s = m.split;
       if (s.payer === "me") {
-        it.p = me;
-        (s.parts || []).forEach(function (x) { var u = pu(x.pid); if (u && u !== me) it.parts.push({ u: u, v: x.v }); });
-        if (!it.parts.length) return null;
-      } else {
-        var pp = pu(s.payer); if (!pp) return null;
-        it.p = pp; it.parts.push({ u: me, v: m.amount });
-      }
-      return it;
-    }
-    if (m.type === "settle" && m.groupId === g.id) {
-      var u2 = pu(m.pid); if (!u2) return null;
-      return { id: m.id, k: "s", d: m.date, x: m.desc || "", a: m.amount, from: m.dir === "out" ? me : u2, to: m.dir === "out" ? u2 : me, by: me };
-    }
-    return null;
+        var pt = (s.parts || []).filter(function (x) { return x.pid === q.id; })[0]; if (!pt) return null;
+        it = { id: m.id, k: "e", d: m.date, x: m.desc || "", t: s.total, by: me, p: me, parts: [{ u: q.uid, v: pt.v }] };
+      } else if (s.payer === q.id) it = { id: m.id, k: "e", d: m.date, x: m.desc || "", t: s.total, by: me, p: q.uid, parts: [{ u: me, v: m.amount }] };
+    } else if (m.type === "settle" && m.pid === q.id) it = { id: m.id, k: "s", d: m.date, x: m.desc || "", a: m.amount, from: m.dir === "out" ? me : q.uid, to: m.dir === "out" ? q.uid : me, by: me };
+    if (it && gn) it.gn = gn;
+    return it;
   }
-  function glBuild(g, it, me) {
+  function glGroupFor(q, it, ex) {
+    if (!it.gn) return ex ? (ex.split ? ex.split.groupId : ex.groupId) : undefined;
+    var g = state.groups.filter(function (x) { return x.name.toLowerCase() === it.gn.toLowerCase(); })[0];
+    if (!g) { g = { id: uid(), name: String(it.gn).slice(0, 40), pids: [], tagId: "", closed: false, due: "" }; ensureGroupTag(g); state.groups.push(g); }
+    if (g.pids.indexOf(q.id) < 0) g.pids.push(q.id);
+    return g.id;
+  }
+  function glBuild(q, it, me, ex) {
+    var b = null;
     if (it.k === "e") {
       if (it.p === me) {
         var sum = 0, parts = [];
-        (it.parts || []).forEach(function (x) { if (x.u !== me) { parts.push({ pid: glPerson(g, x.u), v: x.v }); sum += x.v; } });
-        return { type: "expense", date: it.d, amount: r2(it.t - sum), desc: it.x, split: { total: it.t, payer: "me", groupId: g.id, parts: parts } };
+        (it.parts || []).forEach(function (x) { if (x.u === q.uid) { parts.push({ pid: q.id, v: x.v }); sum += x.v; } });
+        if (parts.length) b = { type: "expense", date: it.d, amount: r2(it.t - sum), desc: it.x, split: { total: it.t, payer: "me", parts: parts } };
+      } else if (it.p === q.uid) {
+        var my = (it.parts || []).filter(function (x) { return x.u === me; })[0];
+        if (my) b = { type: "expense", date: it.d, amount: my.v, desc: it.x, split: { total: it.t, payer: q.id, parts: [] } };
       }
-      var my = (it.parts || []).filter(function (x) { return x.u === me; })[0]; if (!my) return null;
-      return { type: "expense", date: it.d, amount: my.v, desc: it.x, split: { total: it.t, payer: glPerson(g, it.p), groupId: g.id, parts: [] } };
+    } else if (it.k === "s") {
+      if (it.to === me && it.from === q.uid) b = { type: "settle", date: it.d, amount: it.a, desc: it.x || "Pagamento", dir: "in", pid: q.id };
+      else if (it.from === me && it.to === q.uid) b = { type: "settle", date: it.d, amount: it.a, desc: it.x || "Pagamento", dir: "out", pid: q.id };
     }
-    if (it.k === "s") {
-      if (it.to === me) return { type: "settle", date: it.d, amount: it.a, desc: it.x || "Pagamento", dir: "in", pid: glPerson(g, it.from), groupId: g.id };
-      if (it.from === me) return { type: "settle", date: it.d, amount: it.a, desc: it.x || "Pagamento", dir: "out", pid: glPerson(g, it.to), groupId: g.id };
-    }
-    return null;
+    if (!b) return null;
+    var gid = glGroupFor(q, it, ex);
+    if (gid) { if (b.split) b.split.groupId = gid; else b.groupId = gid; }
+    return b;
   }
   function glDefCat() { var c = byId(state.categories, state.prefs.cat); if (!c || !c.active) c = state.categories.filter(function (x) { return x.active; })[0]; return c ? c.id : ""; }
-  function glApply(g, items, me) {
+  function glApply(q, items, me) {
     var ch = false, have = {}, live = {};
     items.forEach(function (it) { if (!it.del && it.by !== me) live[it.id] = it; });
     state.movements = state.movements.filter(function (m) {
-      if (m.gl !== g.id) return true;
+      if (m.gl !== q.id) return true;
       have[m.gi] = m;
       if (!live[m.gi]) { ch = true; return false; }
       return true;
     });
     Object.keys(live).forEach(function (k) {
-      var it = live[k], b = glBuild(g, it, me), ex = have[k];
+      var it = live[k], ex = have[k], b = glBuild(q, it, me, ex);
       if (!b) { if (ex) { state.movements = state.movements.filter(function (m) { return m !== ex; }); ch = true; } return; }
       if (ex) {
-        var before = JSON.stringify([ex.date, ex.amount, ex.desc, ex.split, ex.dir, ex.pid]);
-        ex.date = b.date; ex.amount = b.amount; ex.desc = b.desc; if (b.split) ex.split = b.split; else delete ex.split; if (b.dir) { ex.dir = b.dir; ex.pid = b.pid; }
-        if (before !== JSON.stringify([ex.date, ex.amount, ex.desc, ex.split, ex.dir, ex.pid])) ch = true;
+        var before = JSON.stringify([ex.date, ex.amount, ex.desc, ex.split, ex.dir, ex.pid, ex.groupId]);
+        ex.date = b.date; ex.amount = b.amount; ex.desc = b.desc;
+        if (b.split) ex.split = b.split; else delete ex.split;
+        if (b.dir) { ex.dir = b.dir; ex.pid = b.pid; }
+        if (b.groupId) ex.groupId = b.groupId;
+        if (before !== JSON.stringify([ex.date, ex.amount, ex.desc, ex.split, ex.dir, ex.pid, ex.groupId])) ch = true;
         return;
       }
-      if (g.skip && g.skip[k]) return;
-      var nm = { id: "gl_" + k, accountId: "", tagIds: g.tagId && byId(state.tags, g.tagId) ? [g.tagId] : [], gl: g.id, gi: k };
+      if (q.skip && q.skip[k]) return;
+      var gg = b.split ? b.split.groupId : b.groupId, grp = gg ? byId(state.groups, gg) : null;
+      var nm = { id: "gl_" + q.id + "_" + k, accountId: "", tagIds: grp && grp.tagId && byId(state.tags, grp.tagId) ? [grp.tagId] : [], gl: q.id, gi: k };
       Object.keys(b).forEach(function (x) { nm[x] = b[x]; });
       if (nm.type === "expense") { nm.catId = glDefCat(); nm.subId = ""; }
       state.movements.push(nm); ch = true;
     });
     return ch;
   }
-  function glSync(g, depth) {
+  function glSync(q, depth) {
     depth = depth || 0;
     var tk, me = cl.auth.uid;
     return token().then(function (t) {
       tk = t;
-      return Promise.all([api("GET", "/rest/v1/shared_state?select=data,rev&space_id=eq." + g.gl, null, tk), api("GET", "/rest/v1/shared_members?select=user_id,email&space_id=eq." + g.gl, null, tk)]);
+      return Promise.all([api("GET", "/rest/v1/shared_state?select=data,rev&space_id=eq." + q.gl, null, tk), api("GET", "/rest/v1/shared_members?select=user_id,email&space_id=eq." + q.gl, null, tk)]);
     }).then(function (rs) {
       var r = rs[0];
       if (r.status === 401) { dropAuth(); throw { code: "noauth" }; }
       if (!r.ok) throw { code: "srv" };
       if (sp.cur !== "p") return;
-      if (!r.json || !r.json.length) { delete g.gl; save(); toast("Il gruppo «" + g.name + "» non è più collegato"); renderAll(); return; }
-      var row = r.json[0], rd = row.data || {}, R = Array.isArray(rd.items) ? rd.items : [], mem = {};
-      (rs[1].json || []).forEach(function (m) { mem[m.user_id] = m.email; });
-      g.mem = mem;
-      Object.keys(mem).forEach(function (u) { if (u !== me) glPerson(g, u); });
+      if (!r.json || !r.json.length) { delete q.gl; save(); toast("Il collegamento con " + q.name + " non è più attivo"); renderAll(); return; }
+      var row = r.json[0], rd = row.data || {}, R = Array.isArray(rd.items) ? rd.items : [];
+      (rs[1].json || []).forEach(function (m) { if (m.user_id !== me && !q.uid) q.uid = m.user_id; });
       var out = R.slice(), byI = {}, changed = false, now = Date.now(), seen = {}, gone = {};
       R.forEach(function (i) { byI[i.id] = i; });
       (state.glDel || []).forEach(function (x) { gone[x] = 1; });
       (state.trash || []).forEach(function (e) { if (e.mov) gone[e.mov.id] = 1; });
       function put(it) { var old = byI[it.id]; it.ts = now; if (old) out[out.indexOf(old)] = it; else out.push(it); byI[it.id] = it; changed = true; }
       state.movements.forEach(function (m) {
-        var it = glItemOf(m, g, me); seen[m.id] = 1;
+        var it = glItemOf(m, q, me); seen[m.id] = 1;
         if (!it) { var o2 = byI[m.id]; if (o2 && o2.by === me && !o2.del) put({ id: m.id, del: true, by: me }); return; }
         var old = byI[it.id]; if (!old || old.del || glSig(old) !== glSig(it)) put(it);
       });
       R.forEach(function (i) { if (i.by === me && !i.del && !seen[i.id] && gone[i.id]) put({ id: i.id, del: true, by: me }); });
-      var ap = glApply(g, out, me);
-      if (ap) { glQuiet = true; save(); glQuiet = false; renderAll(); } else { glQuiet = true; save(); glQuiet = false; }
+      var ap = glApply(q, out, me);
+      glQuiet = true; save(); glQuiet = false; if (ap) renderAll();
       if (!changed) return;
-      return api("PATCH", "/rest/v1/shared_state?space_id=eq." + g.gl + "&rev=eq." + row.rev, { data: { kind: "group", name: g.name, items: out }, rev: row.rev + 1, updated_at: new Date().toISOString(), updated_by: me }, tk, "return=representation").then(function (p) {
+      return api("PATCH", "/rest/v1/shared_state?space_id=eq." + q.gl + "&rev=eq." + row.rev, { data: { kind: "pair", items: out }, rev: row.rev + 1, updated_at: new Date().toISOString(), updated_by: me }, tk, "return=representation").then(function (p) {
         if (p.ok && p.json && p.json.length === 1) return;
         if (p.status === 401) { dropAuth(); throw { code: "noauth" }; }
-        if (p.ok || p.status === 409) { if (depth < 3) return glSync(g, depth + 1); return; }
+        if (p.ok || p.status === 409) { if (depth < 3) return glSync(q, depth + 1); return; }
         throw { code: "srv" };
       });
     });
@@ -5882,53 +5882,65 @@ var M = (function () {
   function glRunAll() {
     if (glBusy || !glOn() || !glAny()) return Promise.resolve();
     glBusy = true;
-    var list = state.groups.filter(function (g) { return g.gl; }), p = Promise.resolve();
-    list.forEach(function (g) { p = p.then(function () { if (g.gl && sp.cur === "p") return glSync(g); }); });
+    var p = Promise.resolve();
+    state.persons.filter(function (q) { return q.gl; }).forEach(function (q) { p = p.then(function () { if (q.gl && sp.cur === "p") return glSync(q); }); });
     return p.then(function () { glBusy = false; }, function () { glBusy = false; });
   }
-  /* gruppo creato da un'altra persona: lo creo anche da me */
+  /* qualcuno ha collegato il suo account al mio: creo/collego la persona */
   function glIncoming(s, row, tk) {
     if (sp.cur !== "p") return Promise.resolve();
     glKnown[s.id] = 1;
-    if (state.groups.some(function (g) { return g.gl === s.id; })) return Promise.resolve();
+    if (state.persons.some(function (q) { return q.gl === s.id; })) return Promise.resolve();
     return api("GET", "/rest/v1/shared_members?select=user_id,email&space_id=eq." + s.id, null, tk).then(function (r) {
       if (sp.cur !== "p") { delete glKnown[s.id]; return; }
-      var nm = String(s.name || "Gruppo").slice(0, 40);
-      if (state.groups.some(function (x) { return x.name.toLowerCase() === nm.toLowerCase(); })) nm = (nm.slice(0, 30) + " (account)");
-      var g = { id: uid(), name: nm, pids: [], tagId: "", closed: false, due: "", gl: s.id, mem: {} };
-      (r.json || []).forEach(function (m) { g.mem[m.user_id] = m.email; });
-      state.groups.push(g); ensureGroupTag(g);
-      Object.keys(g.mem).forEach(function (u) { if (u !== cl.auth.uid) glPerson(g, u); });
-      save(); renderAll(); toast("Nuovo gruppo con te: «" + nm + "»");
-      return glSync(g);
+      var others = (r.json || []).filter(function (m) { return m.user_id !== cl.auth.uid; });
+      if (others.length !== 1) return;
+      var o = others[0], q = state.persons.filter(function (x) { return x.uid === o.user_id; })[0];
+      if (!q) {
+        var nm = glNameOf(o.email);
+        q = state.persons.filter(function (x) { return !x.uid && x.name.toLowerCase() === nm.toLowerCase(); })[0];
+        if (!q) { q = { id: uid(), name: nm, def: !state.persons.length }; state.persons.push(q); }
+      }
+      q.uid = o.user_id;
+      if (q.gl && q.gl !== s.id) return;
+      q.gl = s.id; save(); renderAll(); toast("Ora sei collegato con " + q.name);
+      return glSync(q);
     });
   }
-  function glHTML(g) {
-    var h = '<div class="eq" id="glBox"><p><b>Gruppo con account</b></p>';
-    if (!cloudOn || !cl.auth) return h + '<p class="small muted">Funziona dal sito vero, dopo l\'accesso.</p></div>';
-    if (g.gl) {
-      var mem = g.mem || {}, names = Object.keys(mem).filter(function (u) { return u !== cl.auth.uid; }).map(function (u) { return mem[u]; });
-      h += '<p class="small">Collegato' + (names.length ? " con: " + esc(names.join(", ")) : "") + '. Le spese e i saldi che inserisci compaiono come debito/credito anche nell\'app dell\'altra persona, e viceversa. Ognuno modifica solo ciò che ha inserito lui.</p>';
-    } else h += '<p class="small muted">Collega il gruppo agli account: una spesa che inserisci qui diventa debito per l\'altra persona, e viceversa. Serve che l\'altra persona abbia già un account.</p>';
-    h += '<div class="field"><label for="glMail">' + (g.gl ? "Invita un\'altra persona (email)" : "Email dell\'altra persona") + '</label><input id="glMail" type="email" inputmode="email" autocapitalize="none" placeholder="nome@esempio.it"></div><p class="err" id="glErr" role="alert"></p><button class="btn" type="button" id="glGo">' + (g.gl ? "Invita" : "Collega e invita") + "</button>";
-    if (g.gl) h += '<button class="btn ghost small" type="button" id="glNow">Aggiorna ora</button><button class="btn ghost small" type="button" id="glOff">Scollega</button>';
-    return h + "</div>";
+  /* collega una persona a un account (crea il registro condiviso e invita) */
+  function glLink(q, mail) {
+    save();
+    var p = q.gl ? Promise.resolve(q.gl) : shRpc("create_shared_space", { p_name: ("Con " + q.name).slice(0, 30), p_data: { kind: "pair", items: [] } }).then(function (r) { if (!r.ok || typeof r.json !== "string") throw r; q.gl = r.json; glKnown[q.gl] = 1; save(); return q.gl; });
+    return p.then(function (id) { return shRpc("add_space_member", { p_space: id, p_email: mail }); }).then(function (r) {
+      if (!r.ok) throw r;
+      return glSync(q);
+    });
   }
-  function glWire(g) {
-    var go = $("glGo"); if (!go) return;
+  function glNewAcct(np, inp, cb) {
+    var mail = inp && inp.value ? inp.value.trim() : ""; if (!mail || !np) return;
+    inp.value = "";
+    if (!/^\S+@\S+\.\S+$/.test(mail)) { toast("Email non valida: persona creata senza account"); return; }
+    if (!cloudOn || !cl.auth) { toast("Per collegare l'account serve il sito vero, dopo l'accesso"); return; }
+    glLink(np, mail).then(function () { toast(np.name + ": account collegato"); renderAll(); if (cb) cb(); }, function (r) { toast(shErr(r)); });
+  }
+  function pBadge(q) { return q && (q.gl || q.uid) ? ' <span class="sbadge" title="Ha un account Supabase" aria-label="con account">S</span>' : ""; }
+  function glPersonHTML(q) {
+    var h = '<div class="eq" id="glBox"><p><b>Account Supabase</b>' + pBadge(q) + "</p>";
+    if (!cloudOn || !cl.auth) return h + '<p class="small muted">Funziona dal sito vero, dopo l\'accesso.</p></div>';
+    if (q.gl) return h + '<p class="small">Collegata. Le spese divise con ' + esc(q.name) + ' compaiono come debito anche nella sua app, e viceversa. Ognuno modifica solo ciò che ha inserito lui.</p><button class="btn ghost small" type="button" id="glNow">Aggiorna ora</button><button class="btn ghost small" type="button" id="glOff">Scollega</button></div>';
+    return h + '<p class="small muted">Se ha un account, collegala: le spese divise con lei si rifletteranno nella sua app. Senza account resta una persona normale (es. tua madre).</p>' +
+      '<div class="field"><label for="glMail">Email del suo account</label><input id="glMail" type="email" inputmode="email" autocapitalize="none" placeholder="nome@esempio.it"></div><p class="err" id="glErr" role="alert"></p><button class="btn" type="button" id="glGo">Collega account</button></div>';
+  }
+  function glPersonWire(q) {
     function er(t) { var e = $("glErr"); if (e) e.textContent = t; }
-    go.addEventListener("click", function () {
+    if ($("glGo")) $("glGo").addEventListener("click", function () {
       var mail = ($("glMail").value || "").trim();
       if (!/^\S+@\S+\.\S+$/.test(mail)) { er("Scrivi un'email valida."); return; }
-      er(""); go.disabled = true; save();
-      var p = g.gl ? Promise.resolve(g.gl) : shRpc("create_shared_space", { p_name: g.name, p_data: { kind: "group", name: g.name, items: [] } }).then(function (r) { if (!r.ok || typeof r.json !== "string") throw r; g.gl = r.json; glKnown[g.gl] = 1; save(); return g.gl; });
-      p.then(function (id) { return shRpc("add_space_member", { p_space: id, p_email: mail }); }).then(function (r) {
-        if (!r.ok) throw r;
-        return glSync(g);
-      }).then(function () { toast("Gruppo collegato"); closeSheet(); renderAll(); openGroup(g.id); }, function (r) { go.disabled = false; er(shErr(r)); });
+      er(""); $("glGo").disabled = true;
+      glLink(q, mail).then(function () { toast("Account collegato"); closeSheet(); renderAll(); openPerson(q.id); }, function (r) { if ($("glGo")) $("glGo").disabled = false; er(shErr(r)); });
     });
-    if ($("glNow")) $("glNow").addEventListener("click", function () { toast("Aggiorno…"); glSync(g).then(function () { toast("Gruppo aggiornato"); closeSheet(); openGroup(g.id); }, function () { toast("Non riesco ad aggiornare ora"); }); });
-    if ($("glOff")) twoTap($("glOff"), function () { delete g.gl; delete g.mem; save(); closeSheet(); renderAll(); toast("Gruppo scollegato: le spese restano qui"); }, "Tocca ancora per scollegare");
+    if ($("glNow")) $("glNow").addEventListener("click", function () { toast("Aggiorno…"); glSync(q).then(function () { toast("Aggiornato"); }, function () { toast("Non riesco ad aggiornare ora"); }); });
+    if ($("glOff")) twoTap($("glOff"), function () { delete q.gl; save(); closeSheet(); renderAll(); toast("Scollegata: le spese restano qui"); }, "Tocca ancora per scollegare");
   }
   setInterval(function () { if (!document.hidden && cloudOn && cl.auth) shRefresh(false); }, 45000);
 
