@@ -182,6 +182,11 @@ input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--accent);
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink-2); font: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
 .chip[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+.tri { width: 1.1em; height: 1.1em; vertical-align: -0.18em; }
+.ibx { padding: 10px 0; border-top: 1px solid var(--line); }
+.ibx:first-of-type { border-top: 0; }
+.ibx .inl select { flex: 1; min-width: 0; }
+.ibw { display: flex; gap: 6px; align-items: flex-start; }
 .sbadge { display: inline-block; font-size: 0.68rem; font-weight: 800; line-height: 1; padding: 3px 5px; border-radius: 5px; background: var(--accent); color: var(--bg); vertical-align: middle; margin-left: 4px; }
 .pill { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
 .pill.acc { background: var(--accent-soft); color: var(--accent); }
@@ -720,7 +725,7 @@ if ("serviceWorker" in navigator) window.addEventListener("load", function () { 
       <div class="list" id="movList"></div>
       <button class="btn ghost" id="moreBtn" type="button" hidden>Mostra altri</button>
     </div>
-    <div class="selbar" id="selBar" hidden><b id="selCount">0 selezionati</b><div class="sbtns"><button class="btn ghost small" type="button" data-bulk="cat">Categoria</button><button class="btn ghost small" type="button" data-bulk="acc">Conto</button><button class="btn ghost small" type="button" data-bulk="tag">Tag</button><button class="btn danger small" type="button" data-bulk="del">Elimina</button><button class="btn ghost small" type="button" data-bulk="all">Tutti</button></div></div>
+    <div class="selbar" id="selBar" hidden><b id="selCount">0 selezionati</b><div class="sbtns"><button class="btn ghost small" type="button" data-bulk="cat">Categoria</button><button class="btn ghost small" type="button" data-bulk="sub">Sottocategoria</button><button class="btn ghost small" type="button" data-bulk="acc">Conto</button><button class="btn ghost small" type="button" data-bulk="dest">Destinazione</button><button class="btn ghost small" type="button" data-bulk="tag">Tag</button><button class="btn danger small" type="button" data-bulk="del">Elimina</button><button class="btn ghost small" type="button" data-bulk="all">Tutti</button></div></div>
   </section>
 
   <!-- CONTI -->
@@ -1392,7 +1397,7 @@ var M = (function () {
   "use strict";
 
   /* ============ Costanti ============ */
-  var APP_VERSION = "36 (19 nov 2026, 14:00)";
+  var APP_VERSION = "37 (19 nov 2026, 21:45)";
   var KEY3 = "mie-finanze-v3", KEY2 = "mie-finanze-v2", KEY1 = "mie-finanze-v1";
   var SAFE = "Spese di sicurezza";
   var CAT_DEFAULTS = ["Spese generiche", "Trasporti", "Investimenti", "Uscite", "Viaggi", "Casa", SAFE];
@@ -1619,7 +1624,7 @@ var M = (function () {
   }
 
   function normalize(s) {
-    ["categories", "subcategories", "accounts", "tags", "movements", "recurring", "goals", "fundEvents", "loans", "templates", "persons", "groups", "trash"].forEach(function (k) { if (!Array.isArray(s[k])) s[k] = []; });
+    ["categories", "subcategories", "accounts", "tags", "movements", "recurring", "goals", "fundEvents", "loans", "templates", "persons", "groups", "trash", "inbox"].forEach(function (k) { if (!Array.isArray(s[k])) s[k] = []; });
     if (!s.fixIgnored || typeof s.fixIgnored !== "object") s.fixIgnored = {};
     if (!s.budgets || typeof s.budgets !== "object") s.budgets = {};
     Object.keys(s.budgets).forEach(function (k) { var b = s.budgets[k]; if (!b.alloc) b.alloc = {}; b.planned = +b.planned || 0; });
@@ -1999,6 +2004,7 @@ var M = (function () {
       else amt = '<span class="a num">−' + nf.format(m.amount) + "</span>";
     }
     if (m.au && sp.cur !== "p") sub += " · di " + m.au;
+    if (m.rjby) sub += " · rifiutata da " + personName(m.rjby);
     if (feat("receipts")) {
       if (m.rc > 0) pill += ' <span class="pill att" title="Allegato salvato">📎' + (m.rc > 1 ? " " + m.rc : "") + "</span>";
       else if (isDed(m)) pill += ' <span class="pill amber" title="Manca lo scontrino">senza scontrino</span>';
@@ -3833,7 +3839,8 @@ var M = (function () {
   function setSel(on) { selMode = on; document.body.classList.toggle("sel-on", on); selSet = {}; $("selBar").hidden = !on; $("selBtn").textContent = on ? "Fine" : "Seleziona"; selUpd(); renderMovements(); }
   function bulkOK(kind, m) {
     if (m.abb || m.loanId || m.xsp) return false;
-    if (kind === "cat") return m.type === "expense" || m.type === "refund";
+    if (kind === "cat" || kind === "sub") return m.type === "expense" || m.type === "refund";
+    if (kind === "dest") return m.type === "transfer";
     if (kind === "acc") return (m.type === "expense" || m.type === "income" || m.type === "refund") && !!m.accountId;
     if (kind === "tag") return ["expense", "income", "refund", "transfer", "covered"].indexOf(m.type) > -1;
     return ["expense", "income", "refund", "transfer", "covered"].indexOf(m.type) > -1;
@@ -3842,17 +3849,26 @@ var M = (function () {
     var ids = Object.keys(selSet); if (!ids.length) { toast("Seleziona prima dei movimenti"); return; }
     var sel = ids.map(function (i) { return byId(state.movements, i); }).filter(Boolean), ok = sel.filter(function (m) { return bulkOK(kind, m); });
     if (!ok.length) { toast("Questa modifica non si applica ai movimenti scelti"); return; }
-    var skip = sel.length - ok.length, title = { cat: "Cambia categoria", acc: "Cambia conto", tag: "Aggiungi un tag", del: "Elimina i movimenti" }[kind], body = "";
+    var skip = sel.length - ok.length, title = { cat: "Cambia categoria", sub: "Cambia sottocategoria", dest: "Cambia conto di destinazione", acc: "Cambia conto", tag: "Aggiungi un tag", del: "Elimina i movimenti" }[kind], body = "";
     if (kind === "cat") body = '<div class="field"><label for="bkVal">Nuova categoria</label><select id="bkVal">' + optionsHTML(state.categories.filter(function (c) { return c.active; }).map(function (c) { return { v: c.id, l: c.name }; }), "", "Scegli…") + "</select></div>";
+    if (kind === "sub") {
+      var cs = {}; ok.forEach(function (m) { cs[m.catId || ""] = 1; }); var c0 = Object.keys(cs).length === 1 ? Object.keys(cs)[0] : "";
+      body = '<div class="field"><label for="bkCat">Categoria</label><select id="bkCat">' + optionsHTML(state.categories.filter(function (c) { return c.active || c.id === c0; }).map(function (c) { return { v: c.id, l: c.name }; }), c0, "Scegli…") + '</select></div><div class="field"><label for="bkVal">Sottocategoria</label><select id="bkVal">' + optionsHTML(c0 ? subsOf(c0).filter(function (x) { return x.active; }).map(function (x) { return { v: x.id, l: x.name }; }) : [], "", "Nessuna sottocategoria") + "</select></div>";
+    }
+    if (kind === "dest") body = '<div class="field"><label for="bkVal">Nuovo conto di destinazione</label><select id="bkVal">' + optionsHTML(accItems(""), "", "Scegli…") + "</select></div>";
     if (kind === "acc") body = '<div class="field"><label for="bkVal">Nuovo conto</label><select id="bkVal">' + optionsHTML(accItems(""), "", "Scegli…") + "</select></div>";
     if (kind === "tag") body = '<div class="field"><label for="bkVal">Tag da aggiungere</label><select id="bkVal">' + optionsHTML(state.tags.filter(function (t) { return t.active; }).map(function (t) { return { v: t.id, l: "#" + t.name }; }), "", "Scegli…") + "</select></div>";
     if (kind === "del") body = '<p>I movimenti vanno nel Cestino per 30 giorni e li puoi ripristinare.</p>';
     openSheet(title, '<p>Si applica a <b>' + ok.length + "</b> movimenti su " + sel.length + (skip ? ". " + skip + " non si possono cambiare in blocco (prestiti, accolli, versamenti tra spazi…)." : ".") + "</p>" + body + '<p class="err" id="bkErr" role="alert"></p><button class="btn' + (kind === "del" ? " danger" : "") + '" type="button" id="bkGo">' + (kind === "del" ? "Elimina" : "Applica") + "</button>", function () {
+      if ($("bkCat")) $("bkCat").addEventListener("change", function () { $("bkVal").innerHTML = optionsHTML($("bkCat").value ? subsOf($("bkCat").value).filter(function (x) { return x.active; }).map(function (x) { return { v: x.id, l: x.name }; }) : [], "", "Nessuna sottocategoria"); });
       $("bkGo").addEventListener("click", function () {
-        var v = $("bkVal") ? $("bkVal").value : ""; if (kind !== "del" && !v) { $("bkErr").textContent = "Scegli un valore."; return; }
+        var v = $("bkVal") ? $("bkVal").value : "", vc = $("bkCat") ? $("bkCat").value : "";
+        if (kind === "sub") { if (!vc) { $("bkErr").textContent = "Scegli la categoria."; return; } } else if (kind !== "del" && !v) { $("bkErr").textContent = "Scegli un valore."; return; }
         var snap = ok.map(function (m) { return clone(m); }), tids = [];
         ok.forEach(function (m) {
           if (kind === "cat") { m.catId = v; m.subId = ""; }
+          else if (kind === "sub") { m.catId = vc; m.subId = v; }
+          else if (kind === "dest") { if (v !== m.accountId) m.toAccountId = v; }
           else if (kind === "acc") { m.accountId = v; }
           else if (kind === "tag") { m.tagIds = m.tagIds || []; if (m.tagIds.indexOf(v) < 0) m.tagIds.push(v); }
           else tids.push(deleteMovement(m.id));
@@ -4677,7 +4693,7 @@ var M = (function () {
     var tbdIds = state.tags.filter(function (t) { return t.name.trim().toLowerCase() === "to be defined"; }).map(function (t) { return t.id; });
     var groups = {}, byCat = {}, today = todayISO(), cut = M.addDaysISO(today, -120);
     state.movements.forEach(function (m) {
-      if (tbdIds.length && (m.tagIds || []).some(function (x) { return tbdIds.indexOf(x) > -1; })) out.tbd.push(m);
+      if (tbdIds.length && !ig["tbd:" + m.id] && (m.tagIds || []).some(function (x) { return tbdIds.indexOf(x) > -1; })) out.tbd.push(m);
       if ((m.type === "expense" || m.type === "refund" || m.type === "covered") && !(m.desc || "").trim() && !m.note && !ig["nd:" + m.id]) out.nodesc.push(m);
       if (!m.abb && (m.type === "expense" || m.type === "income" || m.type === "refund" || m.type === "transfer" || m.type === "covered")) { var k = dupKeyOf(m); (groups[k] || (groups[k] = [])).push(m); }
       if (m.type === "expense" && m.catId) (byCat[m.catId] || (byCat[m.catId] = [])).push(m.amount);
@@ -4695,19 +4711,41 @@ var M = (function () {
       var lm = pmovs(q.id)[0];
       if (lm && numPref("stale", 60) > 0 && M.daysBetween(lm.date, today) > numPref("stale", 60)) out.stale.push({ q: q, o: o, last: lm.date });
     });
-    out.total = out.tbd.length + out.nodesc.length + out.dups.length + out.big.length + out.stale.length;
+    out.inbox = (state.inbox || []).filter(function (e) { return !e.st; });
+    out.total = out.inbox.length + out.tbd.length + out.nodesc.length + out.dups.length + out.big.length + out.stale.length;
     return out;
+  }
+  var TRI = '<svg class="tri" viewBox="0 0 24 24" aria-label="Da revisionare" role="img"><path d="M12 2.5 1.5 21h21z" fill="#f5c518" stroke="#c99a00" stroke-width="1" stroke-linejoin="round"/><path d="M12 9.5v5.5" stroke="#000" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="18.3" r="1.4" fill="#000"/></svg>';
+  function inboxCard(e) {
+    var m = e.m, q = byId(state.persons, e.q), who = q ? q.name : "?", tot = m.split ? m.split.total : m.amount;
+    var subs = state.subcategories.filter(function (x) { return x.catId === m.catId && x.active; });
+    var warnTxt = e.warn === "cat" ? who + " ha usato la categoria «" + e.cn + (e.sn ? " › " + e.sn : "") + "», che tu non hai. Scegli tu dove metterla." : e.warn === "sub" ? who + " ha usato «" + e.cn + " › " + e.sn + "»: la categoria c'è, la sottocategoria no. Scegli tu." : "";
+    return '<div class="ibx' + (e.warn ? " warn" : "") + '"><div class="kv"><span><b>' + esc(m.desc || "Spesa") + '</b><span class="small muted"> · ' + esc(shortDate(m.date)) + " · da " + esc(who) + '</span></span><b class="num">' + bm(m.amount) + "</b></div>" +
+      '<p class="small muted">Totale ' + nf.format(tot) + (m.split && m.split.payer === "me" ? ", pagato da te" : ", pagato da " + esc(who)) + (e.cn && !e.warn ? " · " + esc(e.cn) + (e.sn ? " › " + esc(e.sn) : "") : "") + "</p>" +
+      (warnTxt ? '<p class="small ibw">' + TRI + " " + esc(warnTxt) + "</p>" : "") +
+      '<div class="inl"><select data-ibcat="' + esc(e.id) + '" aria-label="Categoria">' + optionsHTML(state.categories.filter(function (c) { return c.active || c.id === m.catId; }).map(function (c) { return { v: c.id, l: c.name }; }), m.catId) + '</select><select data-ibsub="' + esc(e.id) + '" aria-label="Sottocategoria">' + optionsHTML(subs.map(function (x) { return { v: x.id, l: x.name }; }), m.subId, "Nessuna sottocategoria") + "</select></div>" +
+      '<div class="btns"><button class="btn small" type="button" data-ibok="' + esc(e.id) + '">Accetta</button><button class="btn ghost small" type="button" data-ibno="' + esc(e.id) + '">Rifiuta</button><button class="btn ghost small" type="button" data-ibig="' + esc(e.id) + '">Ignora</button></div></div>';
+  }
+  function inboxHTML(pend) {
+    var h = "", rev = pend.filter(function (e) { return e.warn; }), okl = pend.filter(function (e) { return !e.warn; });
+    if (okl.length) h += '<div class="card"><h2>Da approvare (' + okl.length + ')</h2><p class="small muted">Spese divise inserite da altre persone con la stessa categoria che hai tu. <b>Accetta</b> e finiscono tra i tuoi movimenti (con il debito), <b>Rifiuta</b> e l\'altra persona vede che non l\'hai accettata.</p>' + okl.map(inboxCard).join("") + "</div>";
+    if (rev.length) h += '<div class="card"><h2>' + TRI + " Da rivedere (" + rev.length + ')</h2><p class="small muted">Spese di altre persone con una categoria o sottocategoria che tu non hai. Scegli dove metterle e accetta, oppure rifiuta.</p>' + rev.map(inboxCard).join("") + "</div>";
+    var back = (state.inbox || []).filter(function (e) { return e.st; }).length;
+    if (back) h += '<button class="linkbtn" type="button" data-ibback="1">Riprendi le spese ignorate o rifiutate (' + back + ")</button>";
+    return h;
   }
   function renderFix() {
     var d = fixData(), n = d.total;
     $("fixCnt").hidden = !n; $("fixCnt").textContent = n;
     var h = '<div class="card"><h2>Da sistemare</h2><p class="small muted">Controlli automatici sui tuoi movimenti. Tocca un movimento per correggerlo: sparisce da qui appena è a posto.</p>' + (n ? "" : '<p class="empty">Tutto in ordine: non c\'è niente da sistemare.</p>') + "</div>";
+    function ignAllBtn(keys) { return keys.length > 1 ? '<div class="btns"><button class="btn ghost small" type="button" data-fixignall="' + esc(keys.join("|")) + '">Ignora tutte (' + keys.length + ")</button></div>" : ""; }
+    h += inboxHTML(d.inbox);
     function ignBtn(key) { return '<div class="btns"><button class="btn ghost small" type="button" data-fixign="' + esc(key) + '">Ignora</button></div>'; }
     function cap(list, fn) { var s2 = list.slice(0, 30).map(fn).join(""); if (list.length > 30) s2 += '<p class="small muted">…e altri ' + (list.length - 30) + ".</p>"; return s2; }
-    if (d.tbd.length) h += '<div class="card"><h2>Con tag «To be defined» (' + d.tbd.length + ')</h2><p class="small muted">Righe che avevi segnato da ricontrollare. Quando le correggi, togli il tag.</p><div class="list">' + cap(d.tbd.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; }), movItem) + "</div></div>";
+    if (d.tbd.length) h += '<div class="card"><h2>Con tag «To be defined» (' + d.tbd.length + ')</h2><p class="small muted">Righe che avevi segnato da ricontrollare. Quando le correggi, togli il tag, oppure ignorale.</p>' + ignAllBtn(d.tbd.map(function (m) { return "tbd:" + m.id; })) + cap(d.tbd.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; }), function (m) { return '<div class="list">' + movItem(m) + "</div>" + ignBtn("tbd:" + m.id); }) + "</div></div>";
     if (d.dups.length) h += '<div class="card"><h2>Possibili doppioni (' + d.dups.length + ')</h2><p class="small muted">Stessa data, importo, conto e descrizione. Le note non contano. Se sono davvero due movimenti diversi, tocca «Ignora».</p>' + cap(d.dups, function (g) { return '<div class="list">' + g.items.map(movItem).join("") + "</div>" + ignBtn("dup:" + g.key); }) + "</div>";
-    if (d.big.length) h += '<div class="card"><h2>Importi insoliti (' + d.big.length + ')</h2><p class="small muted">Spese degli ultimi 4 mesi molto più alte del normale per la loro categoria (almeno 3 volte la mediana).</p>' + cap(d.big.slice().sort(function (a, b) { return a.m.date < b.m.date ? 1 : -1; }), function (x) { return '<div class="list">' + movItem(x.m) + '</div><p class="small muted">Di solito in questa categoria spendi circa ' + nf.format(x.med) + ".</p>" + ignBtn("big:" + x.m.id); }) + "</div>";
-    if (d.nodesc.length) h += '<div class="card"><h2>Senza descrizione (' + d.nodesc.length + ')</h2><p class="small muted">Movimenti senza descrizione né note: aggiungerne una li rende più facili da ritrovare.</p>' + cap(d.nodesc.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; }), function (m) { return '<div class="list">' + movItem(m) + "</div>" + ignBtn("nd:" + m.id); }) + "</div>";
+    if (d.big.length) h += '<div class="card"><h2>Importi insoliti (' + d.big.length + ')</h2><p class="small muted">Spese degli ultimi 4 mesi molto più alte del normale per la loro categoria (almeno 3 volte la mediana).</p>' + ignAllBtn(d.big.map(function (x) { return "big:" + x.m.id; })) + cap(d.big.slice().sort(function (a, b) { return a.m.date < b.m.date ? 1 : -1; }), function (x) { return '<div class="list">' + movItem(x.m) + '</div><p class="small muted">Di solito in questa categoria spendi circa ' + nf.format(x.med) + ".</p>" + ignBtn("big:" + x.m.id); }) + "</div>";
+    if (d.nodesc.length) h += '<div class="card"><h2>Senza descrizione (' + d.nodesc.length + ')</h2><p class="small muted">Movimenti senza descrizione né note: aggiungerne una li rende più facili da ritrovare.</p>' + ignAllBtn(d.nodesc.map(function (m) { return "nd:" + m.id; })) + cap(d.nodesc.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; }), function (m) { return '<div class="list">' + movItem(m) + "</div>" + ignBtn("nd:" + m.id); }) + "</div>";
     if (d.stale.length) h += '<div class="card"><h2>Saldi fermi con le persone (' + d.stale.length + ')</h2><p class="small muted">Qui contano solo i soldi da dare o ricevere con una persona (spese divise), non i conti. Compare chi ha un saldo aperto e nessun movimento da oltre ' + numPref("stale", 60) + ' giorni: serve a ricordarti di farti saldare, o di accollarti il resto. Il numero di giorni si cambia in Settaggi › Parametri.</p>' + cap(d.stale, function (x) { return '<div class="list"><div class="item" role="button" tabindex="0" data-pers="' + esc(x.q.id) + '"><div class="main"><span class="t">' + esc(x.q.name) + '</span><span class="s">' + esc(balText(x.o.split, x.q.name)) + " · ultimo movimento " + esc(shortDate(x.last)) + "</span></div></div></div>" + ignBtn("st:" + x.q.id); }) + "</div>";
     var ni = Object.keys(state.fixIgnored || {}).length;
     if (ni) h += '<button class="linkbtn" type="button" data-fixshow="1">Mostra di nuovo i controlli ignorati (' + ni + ")</button>";
@@ -5141,6 +5179,16 @@ var M = (function () {
     if (t.closest("#pNewOk")) { var npp = newPerson($("pNewName").value); if (npp) { save(); glNewAcct(npp, $("pMail")); renderAll(); toast("Persona aggiunta"); } return; }
     var tpc = t.closest("[data-tpl]"); if (tpc) { openMovement(null, null, null, tpc.dataset.tpl); return; }
     var tpe = t.closest("[data-tpledit]"); if (tpe) { openTpl(tpe.dataset.tpledit); return; }
+    var ib = t.closest("[data-ibok],[data-ibno],[data-ibig],[data-ibback],[data-fixignall]");
+    if (ib) {
+      var d1 = ib.dataset, ent = (state.inbox || []).filter(function (e) { return e.id === (d1.ibok || d1.ibno || d1.ibig); })[0];
+      if (d1.fixignall) { d1.fixignall.split("|").forEach(function (k) { state.fixIgnored[k] = true; }); save(); renderAll(); return; }
+      if (d1.ibback) { state.inbox.forEach(function (e) { e.st = ""; }); save(); renderAll(); return; }
+      if (!ent) return;
+      if (d1.ibok) { state.movements.push(ent.m); state.inbox = state.inbox.filter(function (e) { return e !== ent; }); save(); renderAll(); toast("Spesa accettata"); return; }
+      if (d1.ibno) { ent.st = "rej"; save(); renderAll(); toast("Rifiutata: l'altra persona lo vedrà"); return; }
+      if (d1.ibig) { ent.st = "ign"; save(); renderAll(); toast("Ignorata: la riprendi dal fondo di questa pagina"); return; }
+    }
     var fgi = t.closest("[data-fixign]"); if (fgi) { state.fixIgnored[fgi.dataset.fixign] = true; save(); renderAll(); return; }
     if (t.closest("[data-fixshow]")) { state.fixIgnored = {}; save(); renderAll(); return; }
     var ln = t.closest("[data-loan]"); if (ln) { openLoan(ln.dataset.loan); return; }
@@ -5183,6 +5231,11 @@ var M = (function () {
     if ((t.id === "csvFileRep" || t.id === "csvFileAdd") && t.files && t.files[0]) { importCSVFile(t.files[0], t.id === "csvFileAdd" ? "append" : "replace"); t.value = ""; return; }
     if (t.id === "bkEvery") { state.prefs.backupEvery = +t.value; save(); renderAll(); return; }
     if (t.id === "hideSw") { state.prefs.hide = t.checked; save(); renderAll(); toast(state.prefs.hide ? "Saldi nascosti" : "Saldi visibili"); return; }
+    if (t.dataset && (t.dataset.ibcat || t.dataset.ibsub)) {
+      var ie = (state.inbox || []).filter(function (e) { return e.id === (t.dataset.ibcat || t.dataset.ibsub); })[0];
+      if (ie) { if (t.dataset.ibcat) { ie.m.catId = t.value; ie.m.subId = ""; } else ie.m.subId = t.value; ie.warn = ""; save(); renderAll(); }
+      return;
+    }
     if (t.dataset && t.dataset.st) { stSet(t.dataset.st, t.value); return; }
     var mk = monthKey(view), b = state.budgets[mk];
     if (t.id === "bPlanned" && b) { var v = parseAmount(t.value); if (v >= 0) { b.planned = v; save(); } renderAll(); return; }
@@ -5771,7 +5824,7 @@ var M = (function () {
   function glAny() { return sp.cur === "p" && state.persons.some(function (q) { return q.gl; }); }
   function glSchedule() { if (glQuiet || !glOn() || !glAny()) return; clearTimeout(glT); glT = setTimeout(function () { glRunAll(false); }, 2500); }
   function glNameOf(mail) { var m = mail ? String(mail).split("@")[0] : "Amico"; return m.charAt(0).toUpperCase() + m.slice(1, 30); }
-  function glSig(it) { return JSON.stringify([it.k, it.d, it.x, it.t, it.a, it.p, it.from, it.to, it.parts, it.gn || ""]); }
+  function glSig(it) { return JSON.stringify([it.k, it.d, it.x, it.t, it.a, it.p, it.from, it.to, it.parts, it.gn || "", it.c || "", it.sc || ""]); }
   function glItemOf(m, q, me) {
     if (m.gl || !q.uid) return null;
     var gid = m.split && m.split.groupId ? m.split.groupId : (m.groupId || ""), gn = gid ? groupName(gid) : "", it = null;
@@ -5783,6 +5836,7 @@ var M = (function () {
       } else if (s.payer === q.id) it = { id: m.id, k: "e", d: m.date, x: m.desc || "", t: s.total, by: me, p: q.uid, parts: [{ u: me, v: m.amount }] };
     } else if (m.type === "settle" && m.pid === q.id) it = { id: m.id, k: "s", d: m.date, x: m.desc || "", a: m.amount, from: m.dir === "out" ? me : q.uid, to: m.dir === "out" ? q.uid : me, by: me };
     if (it && gn) it.gn = gn;
+    if (it && it.k === "e") { var ct = m.catId ? byId(state.categories, m.catId) : null, sb = m.subId ? byId(state.subcategories, m.subId) : null; if (ct) it.c = ct.name; if (sb) it.sc = sb.name; }
     return it;
   }
   function glGroupFor(q, it, ex) {
@@ -5813,18 +5867,30 @@ var M = (function () {
     return b;
   }
   function glDefCat() { var c = byId(state.categories, state.prefs.cat); if (!c || !c.active) c = state.categories.filter(function (x) { return x.active; })[0]; return c ? c.id : ""; }
+  function glResolve(it) {
+    var r = { catId: "", subId: "", warn: "" };
+    var c = it.c ? state.categories.filter(function (x) { return x.active && x.name.toLowerCase() === String(it.c).toLowerCase(); })[0] : null;
+    if (c) {
+      r.catId = c.id;
+      if (it.sc) { var s2 = state.subcategories.filter(function (x) { return x.catId === c.id && x.active && x.name.toLowerCase() === String(it.sc).toLowerCase(); })[0]; if (s2) r.subId = s2.id; else r.warn = "sub"; }
+    } else { r.catId = glDefCat(); if (it.c) r.warn = "cat"; }
+    return r;
+  }
   function glApply(q, items, me) {
-    var ch = false, have = {}, live = {};
-    items.forEach(function (it) { if (!it.del && it.by !== me) live[it.id] = it; });
+    var ch = false, have = {}, live = {}, rjs = {}, inb = {};
+    items.forEach(function (it) { if (it.del) return; if (it.k === "r") { if (it.by !== me) rjs[it.of] = 1; return; } if (it.by !== me) live[it.id] = it; });
+    state.movements.forEach(function (m) { var r = !!rjs[m.id]; if (!!m.rjby !== r) { if (r) m.rjby = q.id; else delete m.rjby; ch = true; } });
+    state.inbox.forEach(function (e) { if (e.q === q.id) inb[e.gi] = e; });
     state.movements = state.movements.filter(function (m) {
       if (m.gl !== q.id) return true;
       have[m.gi] = m;
       if (!live[m.gi]) { ch = true; return false; }
       return true;
     });
+    state.inbox = state.inbox.filter(function (e) { if (e.q !== q.id) return true; if (!live[e.gi]) { ch = true; return false; } return true; });
     Object.keys(live).forEach(function (k) {
-      var it = live[k], ex = have[k], b = glBuild(q, it, me, ex);
-      if (!b) { if (ex) { state.movements = state.movements.filter(function (m) { return m !== ex; }); ch = true; } return; }
+      var it = live[k], ex = have[k] || (inb[k] ? inb[k].m : null), b = glBuild(q, it, me, ex);
+      if (!b) { if (have[k]) { state.movements = state.movements.filter(function (m) { return m !== have[k]; }); ch = true; } if (inb[k]) { state.inbox = state.inbox.filter(function (e) { return e !== inb[k]; }); ch = true; } return; }
       if (ex) {
         var before = JSON.stringify([ex.date, ex.amount, ex.desc, ex.split, ex.dir, ex.pid, ex.groupId]);
         ex.date = b.date; ex.amount = b.amount; ex.desc = b.desc;
@@ -5838,8 +5904,11 @@ var M = (function () {
       var gg = b.split ? b.split.groupId : b.groupId, grp = gg ? byId(state.groups, gg) : null;
       var nm = { id: "gl_" + q.id + "_" + k, accountId: "", tagIds: grp && grp.tagId && byId(state.tags, grp.tagId) ? [grp.tagId] : [], gl: q.id, gi: k };
       Object.keys(b).forEach(function (x) { nm[x] = b[x]; });
-      if (nm.type === "expense") { nm.catId = glDefCat(); nm.subId = ""; }
-      state.movements.push(nm); ch = true;
+      if (nm.type === "expense") {
+        var rs = glResolve(it); nm.catId = rs.catId; nm.subId = rs.subId;
+        state.inbox.push({ id: nm.id, q: q.id, gi: k, st: "", warn: rs.warn, cn: it.c || "", sn: it.sc || "", m: nm });
+      } else state.movements.push(nm);
+      ch = true;
     });
     return ch;
   }
@@ -5868,6 +5937,10 @@ var M = (function () {
         var old = byI[it.id]; if (!old || old.del || glSig(old) !== glSig(it)) put(it);
       });
       R.forEach(function (i) { if (i.by === me && !i.del && !seen[i.id] && gone[i.id]) put({ id: i.id, del: true, by: me }); });
+      var rejIds = {};
+      state.inbox.forEach(function (e) { if (e.q === q.id && e.st === "rej") rejIds[e.gi] = 1; });
+      Object.keys(rejIds).forEach(function (k) { var o3 = byI["r_" + k]; if (!o3 || o3.del) put({ id: "r_" + k, k: "r", of: k, by: me }); });
+      R.forEach(function (i) { if (i.k === "r" && i.by === me && !i.del && !rejIds[i.of]) put({ id: i.id, del: true, by: me }); });
       var ap = glApply(q, out, me);
       glQuiet = true; save(); glQuiet = false; if (ap) renderAll();
       if (!changed) return;
