@@ -495,6 +495,17 @@ body.bigfig .hero .sub b, body.bigfig .hero .row b { font-size: 1.3rem; }
 .rcth img { height: 84px; border-radius: 10px; border: 1px solid var(--line); display: block; }
 .rcth.big { display: block; margin-right: 0; } .rcth.big img { height: auto; width: 100%; }
 .rcth button { position: absolute; top: -8px; right: -8px; width: 26px; height: 26px; min-height: 0; padding: 0; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 1rem; line-height: 1; }
+.hw-off { display: none !important; }
+.balchart { width: 100%; height: auto; display: block; }
+.bal-a { stroke: var(--accent); } .bal-f { stroke: var(--bar, #5b7fd6); } .lg.bal-a { background: var(--accent); } .lg.bal-f { background: var(--bar, #5b7fd6); }
+.bal-lab { fill: var(--ink-3); font-size: 10px; } .bal-zero { stroke: var(--line); stroke-dasharray: 3 3; } .bal-sel { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 2 3; }
+.trend { display: flex; gap: 8px; align-items: flex-end; height: 130px; margin: 8px 0; }
+.tcol { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; gap: 4px; }
+.tbars { flex: 1; width: 100%; display: flex; gap: 3px; align-items: flex-end; }
+.tbars i { flex: 1; border-radius: 4px 4px 0 0; display: block; }
+.ti, .lg.ti { background: var(--accent); } .te, .lg.te { background: var(--bad); }
+.lg { display: inline-block; width: 10px; height: 10px; border-radius: 3px; vertical-align: middle; }
+body.off-homecfg details[data-k=home], body.off-hist [data-sttab=bal] { display: none !important; }
 .ftlvl { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
 .ftlvl .pill { cursor: default; }
 body.off-search .field:has(#movQ), body.off-receipts .rcfilt, body.off-receipts details[data-k=ded], body.off-receipts #g-rc, body.off-gmsg #grpReceipt, body.off-req .reqbox, body.off-multi #selBtn, body.off-multi #selBar, body.off-trash details[data-k=trash], body.off-spaces #spaceBar, body.off-spaces details[data-k=sp], body.off-gmsg [data-gmsg], body.off-gmsg #grpThird, body.off-undo .field:has(#parUndo) { display: none !important; }
@@ -643,7 +654,7 @@ if ("serviceWorker" in navigator) window.addEventListener("load", function () { 
       <span class="big num" id="saveAmt"></span>
       <span class="pct num" id="savePct"></span>
     </div>
-    <div class="tiles">
+    <div class="tiles" id="homeTiles">
       <div class="tile"><span class="label">Entrate</span><span class="v num" id="incTot"></span></div>
       <div class="tile"><span class="label">Spese nette</span><span class="v num" id="expTot"></span><span class="small muted" id="expNote"></span></div>
     </div>
@@ -651,10 +662,14 @@ if ("serviceWorker" in navigator) window.addEventListener("load", function () { 
       <div class="rowb"><h2>Budget del mese</h2><span class="num small muted" id="hbText"></span></div>
       <div class="track" id="hbTrack"><div class="fill" id="hbFill"></div></div>
     </div>
-    <div class="card">
+    <div class="card" id="homeCats">
       <div><h2>Spese per categoria</h2><p class="small muted" id="catSub"></p></div>
       <div class="cats" id="cats"></div>
     </div>
+    <div class="card" id="homeFunds"></div>
+    <div class="card" id="homeAccs"></div>
+    <div class="card" id="homeRecent"></div>
+    <div class="card" id="homeTrend"></div>
   </section>
 
   <!-- MOVIMENTI -->
@@ -790,6 +805,7 @@ if ("serviceWorker" in navigator) window.addEventListener("load", function () { 
   <section id="view-stats" class="view" hidden>
     <div class="seg" id="stSeg" role="group" aria-label="Sezione">
       <button type="button" data-sttab="trend" aria-pressed="true">Andamento</button>
+      <button type="button" data-sttab="bal" aria-pressed="false">Conti e fondi</button>
       <button type="button" data-sttab="cmp" aria-pressed="false">Confronto</button>
       <button type="button" data-sttab="sim" aria-pressed="false">Simulazione fondi</button>
       <button type="button" data-sttab="ppl" aria-pressed="false">Persone e gruppi</button>
@@ -1375,7 +1391,7 @@ var M = (function () {
   "use strict";
 
   /* ============ Costanti ============ */
-  var APP_VERSION = "31 (18 nov 2026, 17:30)";
+  var APP_VERSION = "34 (19 nov 2026, 12:00)";
   var KEY3 = "mie-finanze-v3", KEY2 = "mie-finanze-v2", KEY1 = "mie-finanze-v1";
   var SAFE = "Spese di sicurezza";
   var CAT_DEFAULTS = ["Spese generiche", "Trasporti", "Investimenti", "Uscite", "Viaggi", "Casa", SAFE];
@@ -1427,6 +1443,8 @@ var M = (function () {
     calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
     bolt: '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',
     users: '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M18 14.3c1.9.8 3 2.7 3 5.7"/>',
+    layout: '<rect x="3" y="3" width="18" height="6" rx="2"/><rect x="3" y="12" width="8" height="9" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
     trash: '<path d="M4 7h16M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/>',
     space: '<rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><path d="M17 13v8M13 17h8"/>',
     receipt: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
@@ -1438,7 +1456,7 @@ var M = (function () {
     return '<span class="ic ' + (tint || "t1") + (small ? " sm" : "") + '" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[name] || "") + "</svg></span>";
   }
   var GO_ICO = { stats: ["chart", "t2"], alr: ["bell", "t4"], fix: ["checklist", "t4"], ppl: ["users", "t2"], help: ["checklist", "t3"], sav: ["target", "t1"], rec: ["repeat", "t5"], set: ["sliders", "t2"] };
-  var ACC_ICO = { cats: ["folder", "t1"], accs: ["wallet", "t2"], tags: ["hash", "t3"], csv: ["file", "t5"], sec: ["table", "t5"], priv: ["eyeoff", "t4"], tpl: ["bolt", "t3"], bk: ["archive", "t3"], acct: ["user", "t1"], par: ["sliders", "t4"], ft: ["checklist", "t2"], pp: ["user", "t1"], gr: ["users", "t3"], cr: ["banknote", "t1"], db: ["coins", "t4"], sp: ["space", "t7"], trash: ["trash", "t6"], ded: ["receipt", "t3"] };
+  var ACC_ICO = { cats: ["folder", "t1"], accs: ["wallet", "t2"], tags: ["hash", "t3"], csv: ["file", "t5"], sec: ["table", "t5"], priv: ["eyeoff", "t4"], tpl: ["bolt", "t3"], bk: ["archive", "t3"], acct: ["user", "t1"], par: ["sliders", "t4"], ft: ["checklist", "t2"], pp: ["user", "t1"], gr: ["users", "t3"], cr: ["banknote", "t1"], db: ["coins", "t4"], sp: ["space", "t7"], trash: ["trash", "t6"], ded: ["receipt", "t3"], home: ["layout", "t1"], tl: ["clock", "t2"] };
   var H2_ICO = [["Budget del mese", "gauge", "t1"], ["Spese per categoria", "pie", "t2"], ["Budget di", "calendar", "t1"], ["Stipendio e allocazione", "banknote", "t1"], ["Per categoria", "layers", "t2"], ["Riconciliazione", "balance", "t5"],
     ["Fondi per categoria", "coins", "t1"], ["Fondo per fondo", "coins", "t1"], ["Conti e fondi", "wallet", "t2"], ["I tuoi conti", "wallet", "t2"], ["Budget e spesa nel tempo", "chart", "t2"], ["Obiettivi dentro", "target", "t3"], ["I tuoi obiettivi", "target", "t3"],
     ["Nuovo obiettivo", "target", "t3"], ["Movimenti ricorrenti", "repeat", "t5"], ["Movimenti", "list", "t2"], ["Simulazione dei fondi", "trend", "t5"], ["Confronto tra periodi", "compare", "t2"], ["Centro avvisi", "bell", "t4"], ["Avvisi", "bell", "t4"], ["Modelli rapidi", "bolt", "t3"], ["Da sistemare", "checklist", "t4"], ["Persone", "users", "t2"], ["Gruppi", "users", "t2"], ["Saldi con le persone", "users", "t2"]];
@@ -1669,7 +1687,7 @@ var M = (function () {
     return normalize(seed());
   }
   var onSave = null;
-  function save() { try { localStorage.setItem(skey(), JSON.stringify(state)); storageOK = true; } catch (e) { storageOK = false; } if (onSave && sp.cur === "p") onSave(); else if (sp.cur !== "p") shSchedule(sp.cur); }
+  function save() { try { localStorage.setItem(skey(), JSON.stringify(state)); storageOK = true; } catch (e) { storageOK = false; } if (onSave && sp.cur === "p") { onSave(); glSchedule(); } else if (sp.cur !== "p") shSchedule(sp.cur); }
 
   var state = load();
   var view = new Date(); view = new Date(view.getFullYear(), view.getMonth(), 1);
@@ -1816,6 +1834,7 @@ var M = (function () {
     var mk = monthKey(view), list = inMonthList(mk), ag = aggregate(list);
     var sv = r2(ag.income - ag.net);
     $("monthLabel").textContent = longMonth(view);
+    applyHome(); renderHomeWidgets();
     $("incTot").textContent = nf.format(ag.income);
     $("expTot").textContent = nf.format(ag.net);
     var covMonth = M.coveredByCat(list), covTot = r2(Object.keys(covMonth).reduce(function (a, k) { return a + covMonth[k]; }, 0));
@@ -2127,6 +2146,7 @@ var M = (function () {
       var goals = state.goals.filter(function (g) { return g.fundId === c.id; });
       var row = '<div class="fundrow"><div class="rowb"><span class="nm" role="button" tabindex="0" data-fcat="' + esc(c.id) + '" aria-expanded="' + open + '">' + esc(c.name) + (c.active ? "" : ' <span class="pill">Disattivata</span>') + '</span><span class="bal num ' + (sm.balance < -0.004 ? "neg" : "") + '">' + bm(sm.balance) + "</span></div>";
       if (sm.reserved > 0.004 || goals.length) row += '<div class="small muted num">Riservato agli obiettivi ' + bm(sm.reserved) + " · non riservato <b class=\"" + (sm.free < -0.004 ? "neg" : "") + "\">" + bm(sm.free) + "</b></div>";
+      if (mk !== today.slice(0, 7)) row += '<div class="small muted num">A fine ' + esc(longMonth(view).toLowerCase()) + ": <b>" + bm(fm.end) + "</b></div>";
       if (open) {
         row += '<div class="eq"><div class="kv"><span>Saldo precedente</span><b class="num">' + bm(fm.prev) + '</b></div>' +
           '<div class="kv"><span>+ Allocazione mensile</span><b class="num">' + nf.format(fm.planned) + '</b></div>' +
@@ -2134,7 +2154,7 @@ var M = (function () {
           '<div class="kv"><span>− Spesa netta</span><b class="num">' + nf.format(fm.net) + '</b></div>' +
           '<div class="kv tot"><span>= Saldo a fine mese</span><b class="num">' + bm(fm.end) + "</b></div></div>";
         var fo = byId(state.categories, c.id).fundOpening;
-        row += '<div class="small muted">Saldo iniziale del fondo: ' + bm(fo) + "</div>";
+        row += '<div class="small muted">Saldo iniziale del fondo: ' + bm(fo) + "</div>" + fundHistHTML(c.id, mk);
         if (goals.length) row += '<div class="eq">' + goals.map(function (g) { return '<div class="kv"><span>Obiettivo «' + esc(g.name) + '»</span><b class="num">' + nf.format(Math.max(0, g.saved)) + "</b></div>"; }).join("") + "</div>";
         var evs = state.fundEvents.filter(function (e) { return e.catId === c.id && e.date.slice(0, 7) === mk; }).sort(function (a, b) { return a.date < b.date ? -1 : 1; });
         if (evs.length) row += '<div class="eq">' + evs.map(function (e) {
@@ -2636,6 +2656,7 @@ var M = (function () {
     if (cloudOn && cl.auth && sp.cur === "p") h += accountSection();
     h += accd("sp", "Spazi", curSpName(), spacesHTML());
     if (feat("receipts")) h += accd("ded", "Detraibili e scontrini", plural(dedList(dedY || todayISO().slice(0, 4)).length, "spesa", "spese") + " nel " + (dedY || todayISO().slice(0, 4)), dedHTML());
+    h += accd("home", "Schermata iniziale", plural(homeCfg().order.filter(function (k) { return homeCfg().on[k]; }).length, "blocco", "blocchi") + " attivi", homeCfgHTML());
     h += accd("trash", "Cestino", plural((state.trash || []).length, "movimento", "movimenti"), trashHTML());
     var catBody = '<p class="small muted">Ogni categoria ha anche un fondo (con un saldo iniziale). Ogni sottocategoria appartiene a una categoria. Tocca una categoria per vedere le sue sottocategorie.</p>' + state.categories.map(function (c) {
       var subs = subsOf(c.id), k = "c:" + c.id;
@@ -3238,6 +3259,7 @@ var M = (function () {
         if (ed && ed.recurId) o.recurId = ed.recurId;
         if (ed && ed.pay) o.pay = ed.pay;
         if (ed && ed.rc) o.rc = ed.rc;
+        if (ed && ed.gl) { o.gl = ed.gl; o.gi = ed.gi; }
         if (inShared()) { if (ed && ed.au) o.au = ed.au; else if (authorName()) o.au = authorName(); }
         if (t === "transfer") {
           o.accountId = $("mFrom").value; o.toAccountId = $("mTo").value;
@@ -3432,6 +3454,8 @@ var M = (function () {
     ["splitmem", "Divisione ricordata", "Ricorda come hai diviso l'ultima volta in un gruppo.", ["split"], "ppl"],
     ["gmsg", "Messaggi e pagamenti di gruppo", "Messaggio per chi deve soldi e pagamenti diretti tra persone.", ["split"], "ppl"],
     ["receipts", "Allegati e detraibili", "Foto o PDF su ogni movimento e l'elenco automatico delle spese con tag «detraibile».", [], "tool"],
+    ["homecfg", "Schermata iniziale a widget", "Scegli quali blocchi vedere nella Panoramica e in che ordine (in Settaggi).", [], "org"],
+    ["hist", "Saldi nel tempo", "Quanto valevano conti e fondi in un mese passato, e allineamento ai saldi reali.", [], "ctl"],
     ["smart", "Campi ordinati per uso", "Categorie e conti che usi di più compaiono per primi.", [], "mov"],
     ["req", "Campi obbligatori", "Scegli quali campi non si possono lasciare vuoti (in Parametri).", [], "ctl"],
     ["spaces", "Spazi", "Più «quaderni» separati: casa, viaggio, coppia.", [], "org"]
@@ -3713,6 +3737,8 @@ var M = (function () {
   function deleteMovement(id) {
     var m = byId(state.movements, id); if (!m) return "";
     unmirror(m);
+    if (m.gl) { var gg = byId(state.groups, m.gl); if (gg) { if (!gg.skip) gg.skip = {}; gg.skip[m.gi] = 1; } }
+    else if ((m.split && m.split.groupId) || m.groupId) { if (!state.glDel) state.glDel = []; state.glDel.push(m.id); if (state.glDel.length > 300) state.glDel.shift(); }
     if (!state.trash) state.trash = [];
     var e = { id: uid(), at: todayISO(), mov: clone(m) }; state.trash.push(e);
     state.movements = state.movements.filter(function (x) { return x.id !== id; });
@@ -3956,6 +3982,132 @@ var M = (function () {
     var b = ev.target.closest && ev.target.closest("#dedExp,#dedCsv"); if (!b) return;
     dedExport(b.id === "dedExp");
   });
+  /* ============ Schermata iniziale a widget + saldi nel tempo (v32) ============ */
+  var HW = [["alerts", "Avvisi", "homeAlerts", 1], ["tpl", "Modelli rapidi", "homeTpl", 1], ["bal", "Saldi con le persone", "homeBal", 1], ["hero", "Risparmio del mese", "heroCard", 1], ["tiles", "Entrate e spese", "homeTiles", 1], ["budget", "Budget del mese", "homeBudget", 1], ["cats", "Spese per categoria", "homeCats", 1], ["funds", "Fondi (allocazione)", "homeFunds", 0], ["accs", "Saldi dei conti", "homeAccs", 0], ["recent", "Ultimi movimenti", "homeRecent", 0], ["trend", "Entrate e spese, 6 mesi", "homeTrend", 0]];
+  var HW_MAX = 8;
+  function hwDef(k) { return HW.filter(function (x) { return x[0] === k; })[0]; }
+  function homeCfg() {
+    var h = (feat("homecfg") && state.prefs.home) || {}, order = (h.order || []).filter(hwDef), on = {};
+    HW.forEach(function (x) { if (order.indexOf(x[0]) < 0) order.push(x[0]); on[x[0]] = feat("homecfg") && h.on && x[0] in h.on ? !!h.on[x[0]] : !!x[3]; });
+    return { order: order, on: on };
+  }
+  function applyHome() {
+    var cfg = homeCfg(), root = $("view-home"); if (!root) return;
+    cfg.order.forEach(function (k) { var el = $(hwDef(k)[2]); if (!el) return; root.appendChild(el); el.classList.toggle("hw-off", !cfg.on[k]); });
+  }
+  function hwSave(cfg) { state.prefs.home = { order: cfg.order, on: cfg.on }; save(); applyHome(); renderHome(); renderSettings(); }
+  function homeCfgHTML() {
+    var cfg = homeCfg(), n = cfg.order.filter(function (k) { return cfg.on[k]; }).length;
+    return '<p class="small muted">Scegli cosa vedere nella Panoramica e in che ordine (al massimo ' + HW_MAX + ' blocchi attivi). Ora: <b>' + n + "</b>.</p>" +
+      cfg.order.map(function (k, i) {
+        var d = hwDef(k);
+        return '<div class="setrow"><label class="switch" style="flex:1"><input type="checkbox" data-hwon="' + k + '"' + (cfg.on[k] ? " checked" : "") + "><span>" + d[1] + '</span></label><button class="btn ghost small" type="button" data-hw="up:' + k + '" aria-label="Sposta su"' + (i === 0 ? " disabled" : "") + '>↑</button><button class="btn ghost small" type="button" data-hw="down:' + k + '" aria-label="Sposta giù"' + (i === cfg.order.length - 1 ? " disabled" : "") + ">↓</button></div>";
+      }).join("") + '<button class="linkbtn" type="button" data-hw="reset">Ripristina la schermata di base</button>';
+  }
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-hw]"); if (!b) return;
+    var a = b.getAttribute("data-hw"), cfg = homeCfg(), p = a.split(":"), i;
+    if (a === "reset") { delete state.prefs.home; save(); applyHome(); renderHome(); renderSettings(); return; }
+    i = cfg.order.indexOf(p[1]); if (i < 0) return;
+    if (p[0] === "up" && i > 0) { cfg.order.splice(i - 1, 0, cfg.order.splice(i, 1)[0]); hwSave(cfg); }
+    if (p[0] === "down" && i < cfg.order.length - 1) { cfg.order.splice(i + 1, 0, cfg.order.splice(i, 1)[0]); hwSave(cfg); }
+  });
+  function hwToggle(k, on) {
+    var cfg = homeCfg();
+    if (on && cfg.order.filter(function (x) { return cfg.on[x]; }).length >= HW_MAX) { toast("Puoi tenere al massimo " + HW_MAX + " blocchi: spegnine uno"); renderSettings(); return; }
+    cfg.on[k] = on; hwSave(cfg);
+  }
+  function hm(v) { return hideOn() ? MASK : nf.format(v); }
+  function monthLbl(mk) { var p = mk.split("-"); return new Date(+p[0], +p[1] - 1, 1).toLocaleDateString("it-IT", { month: "short", year: "2-digit" }); }
+  function firstMonth() {
+    var m = todayISO().slice(0, 7);
+    state.movements.forEach(function (x) { if (x.date.slice(0, 7) < m) m = x.date.slice(0, 7); });
+    Object.keys(state.budgets).forEach(function (k) { if (k < m) m = k; });
+    (state.fundEvents || []).forEach(function (e) { if (e.date.slice(0, 7) < m) m = e.date.slice(0, 7); });
+    return m;
+  }
+  function monthsBetween(a, b) { var out = [], y = +a.slice(0, 4), mo = +a.slice(5); while ((y + "-" + ("0" + mo).slice(-2)) <= b && out.length < 240) { out.push(y + "-" + ("0" + mo).slice(-2)); mo++; if (mo > 12) { mo = 1; y++; } } return out; }
+  function renderHomeWidgets() {
+    var cfg = homeCfg(), today = todayISO();
+    if (cfg.on.funds && $("homeFunds")) {
+      var rows = state.categories.map(function (c) { return { c: c, v: fundBal(c.id) }; }).filter(function (r) { return Math.abs(r.v) > 0.004; }).sort(function (a, b) { return b.v - a.v; }), mx = rows.length ? Math.max.apply(null, rows.map(function (r) { return Math.abs(r.v); })) : 1;
+      $("homeFunds").innerHTML = "<h2>Fondi</h2>" + (rows.length ? rows.slice(0, 7).map(function (r) { return '<div><div class="cat-top"><span>' + esc(r.c.name) + '</span><span class="amt num ' + (r.v < 0 ? "neg" : "") + '">' + hm(r.v) + '</span></div><div class="track thin"><div class="fill" style="width:' + Math.max(3, Math.abs(r.v) / mx * 100) + '%"></div></div></div>'; }).join("") + (rows.length > 7 ? '<p class="small muted">+ altri ' + (rows.length - 7) + " fondi</p>" : "") + '<div class="kv"><span>Totale fondi</span><b class="num">' + hm(M.fundsTotal(state, today)) + "</b></div>" : '<p class="empty">Nessun fondo con un saldo.</p>');
+    }
+    if (cfg.on.accs && $("homeAccs")) {
+      var bl = M.accountBalances(state, today), ac = state.accounts.filter(function (a) { return a.active; }), tt = 0;
+      ac.forEach(function (a) { tt += bl[a.id] || 0; });
+      $("homeAccs").innerHTML = "<h2>Conti</h2>" + ac.map(function (a) { return '<div class="kv"><span>' + esc(a.name) + '</span><b class="num">' + hm(bl[a.id] || 0) + "</b></div>"; }).join("") + '<div class="kv tot"><span>Totale</span><b class="num">' + hm(r2(tt)) + "</b></div>";
+    }
+    if (cfg.on.recent && $("homeRecent")) {
+      var rc = state.movements.slice().sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; }).slice(0, 5);
+      $("homeRecent").innerHTML = "<h2>Ultimi movimenti</h2>" + (rc.length ? '<div class="list">' + rc.map(movItem).join("") + "</div>" : '<p class="empty">Ancora nessun movimento.</p>');
+    }
+    if (cfg.on.trend && $("homeTrend")) {
+      var ms = monthsBetween(monthKey(new Date(new Date().getFullYear(), new Date().getMonth() - 5, 1)), today.slice(0, 7)), data = ms.map(function (mk) { var ag = aggregate(inMonthList(mk)); return { mk: mk, i: ag.income, e: ag.net }; }), top = Math.max(1, Math.max.apply(null, data.map(function (d) { return Math.max(d.i, d.e); })));
+      $("homeTrend").innerHTML = "<h2>Entrate e spese</h2>" + '<div class="trend">' + data.map(function (d) { return '<div class="tcol"><div class="tbars"><i class="ti" style="height:' + Math.max(2, d.i / top * 100) + '%" title="Entrate ' + nf.format(d.i) + '"></i><i class="te" style="height:' + Math.max(2, d.e / top * 100) + '%" title="Spese ' + nf.format(d.e) + '"></i></div><span class="small muted">' + esc(monthLbl(d.mk)) + "</span></div>"; }).join("") + '</div><p class="small muted"><span class="lg ti"></span> entrate <span class="lg te"></span> spese nette</p>';
+    }
+  }
+  var tlM = "";
+  function balPoint(m, today) {
+    var cur = m === today.slice(0, 7), date = cur ? today : m + "-31", b = M.accountBalances(state, date), a = 0, f = 0;
+    state.accounts.forEach(function (x) { if (x.active) a += b[x.id] || 0; });
+    state.categories.forEach(function (c) { f += cur ? M.fundNow(state, c.id, today).balance : M.fundEOM(state, c.id, m).balance; });
+    return { m: m, a: r2(a), f: r2(f) };
+  }
+  function balChart() {
+    var today = todayISO(), ms = monthsBetween(firstMonth(), today.slice(0, 7)); if (ms.length > 36) ms = ms.slice(-36);
+    if (ms.length < 2) ms = [monthKey(new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1))].concat(ms);
+    var pts = ms.map(function (m) { return balPoint(m, today); }), W = 340, H = 170, L = 8, R = 8, T = 12, B = 24;
+    var vals = []; pts.forEach(function (q) { vals.push(q.a, q.f); });
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals), n = pts.length, pad = Math.max(1, (hi - lo) * 0.12); lo -= pad; hi += pad;
+    function X(i) { return L + (W - L - R) * (n === 1 ? 0.5 : i / (n - 1)); }
+    function Y(v) { return T + (H - T - B) * (1 - (v - lo) / (hi - lo)); }
+    function line(k, cls) { return '<polyline class="' + cls + '" fill="none" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="' + pts.map(function (q, i) { return X(i).toFixed(1) + "," + Y(q[k]).toFixed(1); }).join(" ") + '"/>'; }
+    var si = tlM && tlM !== "start" ? ms.indexOf(tlM) : -1, tick = Math.max(1, Math.ceil(n / 5)), lab = "";
+    pts.forEach(function (q, i) { if (i % tick === 0 || i === n - 1) lab += '<text x="' + X(i).toFixed(1) + '" y="' + (H - 6) + '" text-anchor="' + (i === 0 ? "start" : i === n - 1 ? "end" : "middle") + '" class="bal-lab">' + esc(monthLbl(q.m)) + "</text>"; });
+    var zero = lo < 0 ? '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1) + '" class="bal-zero"/>' : "";
+    var last = pts[n - 1];
+    return '<svg class="balchart" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Andamento di conti e fondi mese per mese">' + zero + (si >= 0 ? '<line x1="' + X(si).toFixed(1) + '" x2="' + X(si).toFixed(1) + '" y1="' + T + '" y2="' + (H - B) + '" class="bal-sel"/>' : "") + line("f", "bal-f") + line("a", "bal-a") + lab + "</svg>" +
+      '<p class="small muted"><span class="lg bal-a"></span> Conti <b class="num">' + hm(last.a) + '</b> &nbsp; <span class="lg bal-f"></span> Fondi <b class="num">' + hm(last.f) + "</b> (oggi)</p>";
+  }
+  function balHTML() {
+    return '<div class="card"><h2>Conti e fondi nel tempo</h2>' + balChart() + "</div>" + '<div class="card">' + tlHTML() + "</div>";
+  }
+  function tlHTML() {
+    var cur = todayISO().slice(0, 7), ms = monthsBetween(firstMonth(), cur); if (!tlM || (tlM !== "start" && ms.indexOf(tlM) < 0)) tlM = cur;
+    var date = tlM === "start" ? "0000-00-00" : tlM + "-31", bl = M.accountBalances(state, date), tA = 0, tF = 0;
+    var ac = state.accounts.filter(function (a) { return a.active || Math.abs(bl[a.id] || 0) > 0.004; });
+    var fs = state.categories.map(function (c) { return { c: c, v: tlM === "start" ? r2(+c.fundOpening || 0) : M.fundEOM(state, c.id, tlM).balance }; }).filter(function (r) { return Math.abs(r.v) > 0.004; });
+    ac.forEach(function (a) { tA += bl[a.id] || 0; }); fs.forEach(function (r) { tF += r.v; });
+    var opt = [{ v: "start", l: "All'inizio (saldi iniziali)" }].concat(ms.slice().reverse().map(function (mk) { return { v: mk, l: "Fine " + longMonth(new Date(+mk.slice(0, 4), +mk.slice(5) - 1, 1)).toLowerCase() }; }));
+    return '<h2>Un momento preciso</h2><p class="small muted">Guarda quanto valevano conti e fondi alla fine di un mese passato, anche all\'inizio di tutto. I numeri sono calcolati dai tuoi movimenti.</p>' +
+      '<div class="field"><label for="tlMonth">Momento</label><select id="tlMonth">' + optionsHTML(opt, tlM) + "</select></div>" +
+      '<h3 class="small">Conti</h3><div class="eq">' + ac.map(function (a) { return '<div class="kv"><span>' + esc(a.name) + '</span><b class="num">' + hm(bl[a.id] || 0) + "</b></div>"; }).join("") + '<div class="kv tot"><span>Totale conti</span><b class="num">' + hm(r2(tA)) + "</b></div></div>" +
+      '<h3 class="small">Fondi</h3><div class="eq">' + (fs.map(function (r) { return '<div class="kv"><span>' + esc(r.c.name) + '</span><b class="num ' + (r.v < 0 ? "neg" : "") + '">' + hm(r.v) + "</b></div>"; }).join("") || '<p class="empty">Nessun fondo con un saldo.</p>') + '<div class="kv tot"><span>Totale fondi</span><b class="num">' + hm(r2(tF)) + "</b></div></div>" +
+      '<button class="btn" type="button" id="tlAlign">Allinea ai saldi reali di oggi</button><p class="hint">Se i saldi di partenza non tornano, scrivi quanto hai davvero oggi: ricalcolo io i saldi iniziali.</p>';
+  }
+  function openAlign() {
+    var today = todayISO(), bl = M.accountBalances(state, today), ac = state.accounts.filter(function (a) { return a.active; }), fs = state.categories.filter(function (c) { return c.active || Math.abs(fundBal(c.id)) > 0.004; });
+    openSheet("Allinea ai saldi reali", '<p class="small muted">Scrivi quanto hai <b>davvero oggi</b>. Lascia vuoto ciò che è già giusto. L\'app cambia solo il saldo iniziale, nessun movimento.</p><h3 class="small">Conti (oggi: saldo calcolato)</h3>' +
+      ac.map(function (a) { return '<div class="field"><label for="al_a_' + esc(a.id) + '">' + esc(a.name) + " · ora " + nf.format(bl[a.id] || 0) + '</label><input id="al_a_' + esc(a.id) + '" class="num" inputmode="decimal" placeholder="' + numStr(bl[a.id] || 0) + '"></div>'; }).join("") +
+      '<h3 class="small">Fondi</h3>' + fs.map(function (c) { var v = fundBal(c.id); return '<div class="field"><label for="al_f_' + esc(c.id) + '">' + esc(c.name) + " · ora " + nf.format(v) + '</label><input id="al_f_' + esc(c.id) + '" class="num" inputmode="decimal" placeholder="' + numStr(v) + '"></div>'; }).join("") +
+      '<p class="err" id="alErr" role="alert"></p><button class="btn" type="button" id="alGo">Aggiorna i saldi iniziali</button><button class="linkbtn" type="button" data-close="1">Annulla</button>', function () {
+        $("alGo").addEventListener("click", function () {
+          var ch = [], bad = "", old = { a: {}, f: {} };
+          ac.forEach(function (a) { var v = $("al_a_" + a.id).value.trim(); if (!v) return; var n = parseAmount(v); if (!isFinite(n)) { bad = "Importo non valido per " + a.name; return; } var d = r2(n - (bl[a.id] || 0)); if (Math.abs(d) > 0.004) ch.push(function () { old.a[a.id] = a.opening || 0; a.opening = r2((a.opening || 0) + d); }); });
+          fs.forEach(function (c) { var v = $("al_f_" + c.id).value.trim(); if (!v) return; var n = parseAmount(v); if (!isFinite(n)) { bad = "Importo non valido per " + c.name; return; } var d = r2(n - fundBal(c.id)); if (Math.abs(d) > 0.004) ch.push(function () { old.f[c.id] = c.fundOpening || 0; c.fundOpening = r2((c.fundOpening || 0) + d); }); });
+          if (bad) { $("alErr").textContent = bad; return; }
+          if (!ch.length) { closeSheet(); toast("Nessuna differenza da correggere"); return; }
+          ch.forEach(function (f) { f(); }); save(); closeSheet(); renderAll();
+          toast("Saldi iniziali aggiornati", function () { state.accounts.forEach(function (a) { if (a.id in old.a) a.opening = old.a[a.id]; }); state.categories.forEach(function (c) { if (c.id in old.f) c.fundOpening = old.f[c.id]; }); save(); renderAll(); });
+        });
+      });
+  }
+  document.addEventListener("click", function (ev) { if (ev.target.closest && ev.target.closest("#tlAlign")) openAlign(); });
+  function fundHistHTML(catId, mk) {
+    var fm0 = firstMonth(), ms = monthsBetween(fm0, mk).slice(-12); if (!ms.length) return "";
+    return '<div class="small muted" style="margin-top:8px">Quanto valeva a fine mese</div><div class="eq">' + ms.slice().reverse().map(function (m) { var f = M.fundMonth(state, catId, m), d = r2(f.end - f.prev); return '<div class="kv"><span>' + esc(monthLbl(m)) + '</span><span class="num"><b>' + bm(f.end) + '</b> <small class="' + (d < 0 ? "neg" : "good") + '">' + (hideOn() ? "" : sgn(d)) + "</small></span></div>"; }).join("") + "</div>";
+  }
   function groupReceipt(g, bal) {
     var ex = state.movements.filter(function (m) { return m.type === "expense" && !m.abb && m.split && m.split.groupId === g.id; }).sort(function (a, b) { return a.date < b.date ? -1 : 1; });
     var tot = r2(ex.reduce(function (a, m) { return a + m.split.total; }, 0)), n = g.pids.length + 1;
@@ -4386,6 +4538,7 @@ var M = (function () {
       if (!ids.length && nm && !g.closed) head += '<p class="hint">Tutti i saldi sono a zero: puoi chiudere il gruppo.</p>';
       head += '<button class="btn ghost" type="button" id="grpClose">' + (g.closed ? "Riapri il gruppo" : "Chiudi il gruppo") + "</button>" + (g.closed ? '<p class="hint">Gruppo chiuso: il suo tag non si sceglie più nei nuovi movimenti, ma resta nelle statistiche.</p>' : '<p class="hint">Chiudendo il gruppo, anche il suo tag non si potrà più scegliere nei nuovi movimenti (resta per le statistiche).</p>');
     }
+    if (g) head += glHTML(g);
     var html = head + '<form id="grpForm" novalidate><div class="field"><label for="grpName">Nome del gruppo</label><input id="grpName" maxlength="40" placeholder="Es. Vacanza Sardegna" autocomplete="off" value="' + esc(g ? g.name : "") + '"></div>' +
       '<div class="field"><label for="grpDue">Scadenza per i saldi (facoltativa)</label><input id="grpDue" type="date" value="' + esc(g && g.due ? g.due : "") + '"></div>' +
       '<div class="field"><span class="lbl">Partecipanti (tu ci sei sempre)</span><div class="chips" id="grpPeople"></div><div class="inl"><input id="grpNew" maxlength="30" placeholder="Nuova persona" autocomplete="off"><button class="btn ghost small" type="button" id="grpNewOk">Aggiungi</button></div></div>' +
@@ -4405,6 +4558,7 @@ var M = (function () {
         save(); closeSheet(); renderAll(); toast(g ? "Gruppo salvato" : "Gruppo creato");
       });
       if (g) {
+        glWire(g);
         $("grpSettle").addEventListener("click", function () { openSettle(null, g.id, null); });
         $("grpReceipt").addEventListener("click", function () { shareText(groupReceipt(g, bal)); });
         Array.prototype.forEach.call(document.querySelectorAll("[data-gmsg]"), function (b) { b.addEventListener("click", function () { shareText(groupMsg(g, b.dataset.gmsg, bal)); }); });
@@ -5026,7 +5180,7 @@ var M = (function () {
     setProfile(pb.dataset.prof); save(); renderAll(); renderSettings(); wizRefresh(); toast("Livello " + PROFILES[pb.dataset.prof].n);
   });
   document.addEventListener("change", function (ev) {
-    var t = ev.target; if (!t || !t.id && !(t.dataset && (t.dataset.feat || t.dataset.req))) return;
+    var t = ev.target; if (!t || !t.id && !(t.dataset && (t.dataset.feat || t.dataset.req || t.dataset.hwon))) return;
     if (t.dataset && t.dataset.req) { state.prefs.req = state.prefs.req || {}; state.prefs.req[t.dataset.req] = t.checked; save(); toast("Salvato"); return; }
     if (t.dataset && t.dataset.feat) {
       var fk = t.dataset.feat, ff = state.prefs.feat = state.prefs.feat || {}, msg = "Salvato", names = [];
@@ -5035,6 +5189,8 @@ var M = (function () {
       else { ff[fk] = false; FEATS.forEach(function (x) { if (x[3].indexOf(fk) > -1 && ff[x[0]] !== false) { names.push(x[1]); ff[x[0]] = false; } }); if (names.length) msg = "Ho spento anche: " + names.join(", "); }
       state.prefs.profile = curProfile(); save(); renderAll(); renderSettings(); wizRefresh(); toast(msg); return;
     }
+    if (t.id === "tlMonth") { tlM = t.value; renderStats(); return; }
+    if (t.dataset && t.dataset.hwon) { hwToggle(t.dataset.hwon, t.checked); return; }
     if (t.id === "dedYear") { dedY = t.value; renderSettings(); return; }
     var v;
     if (t.id === "parTol") { v = parseAmount(t.value); state.prefs.tol = v >= 0 ? r2(v) : 1; t.value = numStr(tolV()); }
@@ -5275,7 +5431,7 @@ var M = (function () {
     if (!$("stBody")) return;
     Array.prototype.forEach.call(document.querySelectorAll("#stSeg button"), function (b) { b.setAttribute("aria-pressed", b.dataset.sttab === stTab ? "true" : "false"); });
     var old = document.querySelector("#stBody .tscroll.chart"), keep = old ? old.scrollLeft : null;
-    $("stBody").innerHTML = stTab === "trend" ? trendHTML() : stTab === "cmp" ? cmpHTML() : stTab === "ppl" ? pplStatHTML() : stTab === "sub" ? subHTML() : simHTML();
+    $("stBody").innerHTML = stTab === "trend" ? trendHTML() : stTab === "bal" ? balHTML() : stTab === "cmp" ? cmpHTML() : stTab === "ppl" ? pplStatHTML() : stTab === "sub" ? subHTML() : simHTML();
     var sc = document.querySelector("#stBody .tscroll.chart");
     if (sc) sc.scrollLeft = keep != null ? keep : sc.scrollWidth;
   }
@@ -5470,10 +5626,12 @@ var M = (function () {
       var have = {}; sp.list.forEach(function (x) { if (x.remote) have[x.remote] = x; });
       r.json.forEach(function (s) { if (have[s.id] && have[s.id].name !== s.name) { have[s.id].name = s.name; spSave(); renderSpaceBar(); } });
       Object.keys(have).forEach(function (k) { if (!r.json.some(function (s) { return s.id === k; })) shGone(have[k]); });
-      var news = r.json.filter(function (s) { return !have[s.id]; });
+      if (sp.cur === "p") state.groups.forEach(function (g) { if (g.gl) glKnown[g.gl] = 1; });
+      var news = r.json.filter(function (s) { return !have[s.id] && !glKnown[s.id]; });
       return Promise.all(news.map(function (s) {
         return api("GET", "/rest/v1/shared_state?select=data,rev&space_id=eq." + s.id, null, tk).then(function (q) {
           var row = q.json && q.json[0]; if (!row) return;
+          if (row.data && row.data.kind === "group") return glIncoming(s, row, tk);
           var id = uid(), norm = normalize(clone(row.data)), str = JSON.stringify(norm);
           try { localStorage.setItem(SPP + id, str); } catch (e) { return; }
           sp.list.push({ id: id, name: s.name, remote: s.id, rev: row.rev, h: hashStr(str) }); jset(SHB + id, norm); spSave(); renderSpaceBar();
@@ -5482,7 +5640,7 @@ var M = (function () {
       }));
     }).catch(function () {});
   }
-  function shRefresh(manual) { return shDiscover().then(function () { return syncAllShared(manual); }); }
+  function shRefresh(manual) { return shDiscover().then(function () { return syncAllShared(manual); }).then(function () { return glRunAll(); }); }
   function shRpc(fn, body) { return token().then(function (t) { return api("POST", "/rest/v1/rpc/" + fn, body, t); }); }
   function shErr(r) {
     var m = r && r.json && (r.json.message || r.json.hint || ""), s = String(m || "");
@@ -5547,7 +5705,181 @@ var M = (function () {
       return api("POST", "/rest/v1/rpc/remove_space_member", { p_space: e.remote, p_user: cl.auth.uid }, t);
     }); }).catch(function () {});
   }
-  setInterval(function () { if (!document.hidden && cloudOn && cl.auth && sp.list.length) shRefresh(false); }, 45000);
+  /* ============ Gruppi con account (v34) ============ */
+  var glT = null, glBusy = false, glQuiet = false, glKnown = {};
+  function glOn() { return !!(cloudOn && cl.auth && sp.cur === "p"); }
+  function glAny() { return sp.cur === "p" && state.groups.some(function (g) { return g.gl; }); }
+  function glSchedule() { if (glQuiet || !glOn() || !glAny()) return; clearTimeout(glT); glT = setTimeout(function () { glRunAll(false); }, 2500); }
+  function glNameOf(g, u) {
+    var mail = g.mem && g.mem[u] ? String(g.mem[u]).split("@")[0] : "Amico";
+    return mail.charAt(0).toUpperCase() + mail.slice(1, 30);
+  }
+  function glPerson(g, u) {
+    var q = state.persons.filter(function (x) { return x.uid === u; })[0];
+    if (!q) {
+      var nm = glNameOf(g, u);
+      q = state.persons.filter(function (x) { return !x.uid && x.name.toLowerCase() === nm.toLowerCase(); })[0];
+      if (q) q.uid = u;
+      else { q = { id: uid(), name: nm, def: !state.persons.length, uid: u }; state.persons.push(q); }
+    }
+    if (g.pids.indexOf(q.id) < 0) g.pids.push(q.id);
+    return q.id;
+  }
+  function glSig(it) { return JSON.stringify([it.k, it.d, it.x, it.t, it.a, it.p, it.from, it.to, it.parts]); }
+  function glItemOf(m, g, me) {
+    if (m.gl) return null;
+    function pu(pid) { var q = byId(state.persons, pid); return q && q.uid ? q.uid : ""; }
+    if (m.type === "expense" && m.split && m.split.groupId === g.id) {
+      var s = m.split, it = { id: m.id, k: "e", d: m.date, x: m.desc || "", t: s.total, by: me, parts: [] };
+      if (s.payer === "me") {
+        it.p = me;
+        (s.parts || []).forEach(function (x) { var u = pu(x.pid); if (u && u !== me) it.parts.push({ u: u, v: x.v }); });
+        if (!it.parts.length) return null;
+      } else {
+        var pp = pu(s.payer); if (!pp) return null;
+        it.p = pp; it.parts.push({ u: me, v: m.amount });
+      }
+      return it;
+    }
+    if (m.type === "settle" && m.groupId === g.id) {
+      var u2 = pu(m.pid); if (!u2) return null;
+      return { id: m.id, k: "s", d: m.date, x: m.desc || "", a: m.amount, from: m.dir === "out" ? me : u2, to: m.dir === "out" ? u2 : me, by: me };
+    }
+    return null;
+  }
+  function glBuild(g, it, me) {
+    if (it.k === "e") {
+      if (it.p === me) {
+        var sum = 0, parts = [];
+        (it.parts || []).forEach(function (x) { if (x.u !== me) { parts.push({ pid: glPerson(g, x.u), v: x.v }); sum += x.v; } });
+        return { type: "expense", date: it.d, amount: r2(it.t - sum), desc: it.x, split: { total: it.t, payer: "me", groupId: g.id, parts: parts } };
+      }
+      var my = (it.parts || []).filter(function (x) { return x.u === me; })[0]; if (!my) return null;
+      return { type: "expense", date: it.d, amount: my.v, desc: it.x, split: { total: it.t, payer: glPerson(g, it.p), groupId: g.id, parts: [] } };
+    }
+    if (it.k === "s") {
+      if (it.to === me) return { type: "settle", date: it.d, amount: it.a, desc: it.x || "Pagamento", dir: "in", pid: glPerson(g, it.from), groupId: g.id };
+      if (it.from === me) return { type: "settle", date: it.d, amount: it.a, desc: it.x || "Pagamento", dir: "out", pid: glPerson(g, it.to), groupId: g.id };
+    }
+    return null;
+  }
+  function glDefCat() { var c = byId(state.categories, state.prefs.cat); if (!c || !c.active) c = state.categories.filter(function (x) { return x.active; })[0]; return c ? c.id : ""; }
+  function glApply(g, items, me) {
+    var ch = false, have = {}, live = {};
+    items.forEach(function (it) { if (!it.del && it.by !== me) live[it.id] = it; });
+    state.movements = state.movements.filter(function (m) {
+      if (m.gl !== g.id) return true;
+      have[m.gi] = m;
+      if (!live[m.gi]) { ch = true; return false; }
+      return true;
+    });
+    Object.keys(live).forEach(function (k) {
+      var it = live[k], b = glBuild(g, it, me), ex = have[k];
+      if (!b) { if (ex) { state.movements = state.movements.filter(function (m) { return m !== ex; }); ch = true; } return; }
+      if (ex) {
+        var before = JSON.stringify([ex.date, ex.amount, ex.desc, ex.split, ex.dir, ex.pid]);
+        ex.date = b.date; ex.amount = b.amount; ex.desc = b.desc; if (b.split) ex.split = b.split; else delete ex.split; if (b.dir) { ex.dir = b.dir; ex.pid = b.pid; }
+        if (before !== JSON.stringify([ex.date, ex.amount, ex.desc, ex.split, ex.dir, ex.pid])) ch = true;
+        return;
+      }
+      if (g.skip && g.skip[k]) return;
+      var nm = { id: "gl_" + k, accountId: "", tagIds: g.tagId && byId(state.tags, g.tagId) ? [g.tagId] : [], gl: g.id, gi: k };
+      Object.keys(b).forEach(function (x) { nm[x] = b[x]; });
+      if (nm.type === "expense") { nm.catId = glDefCat(); nm.subId = ""; }
+      state.movements.push(nm); ch = true;
+    });
+    return ch;
+  }
+  function glSync(g, depth) {
+    depth = depth || 0;
+    var tk, me = cl.auth.uid;
+    return token().then(function (t) {
+      tk = t;
+      return Promise.all([api("GET", "/rest/v1/shared_state?select=data,rev&space_id=eq." + g.gl, null, tk), api("GET", "/rest/v1/shared_members?select=user_id,email&space_id=eq." + g.gl, null, tk)]);
+    }).then(function (rs) {
+      var r = rs[0];
+      if (r.status === 401) { dropAuth(); throw { code: "noauth" }; }
+      if (!r.ok) throw { code: "srv" };
+      if (sp.cur !== "p") return;
+      if (!r.json || !r.json.length) { delete g.gl; save(); toast("Il gruppo «" + g.name + "» non è più collegato"); renderAll(); return; }
+      var row = r.json[0], rd = row.data || {}, R = Array.isArray(rd.items) ? rd.items : [], mem = {};
+      (rs[1].json || []).forEach(function (m) { mem[m.user_id] = m.email; });
+      g.mem = mem;
+      Object.keys(mem).forEach(function (u) { if (u !== me) glPerson(g, u); });
+      var out = R.slice(), byI = {}, changed = false, now = Date.now(), seen = {}, gone = {};
+      R.forEach(function (i) { byI[i.id] = i; });
+      (state.glDel || []).forEach(function (x) { gone[x] = 1; });
+      (state.trash || []).forEach(function (e) { if (e.mov) gone[e.mov.id] = 1; });
+      function put(it) { var old = byI[it.id]; it.ts = now; if (old) out[out.indexOf(old)] = it; else out.push(it); byI[it.id] = it; changed = true; }
+      state.movements.forEach(function (m) {
+        var it = glItemOf(m, g, me); seen[m.id] = 1;
+        if (!it) { var o2 = byI[m.id]; if (o2 && o2.by === me && !o2.del) put({ id: m.id, del: true, by: me }); return; }
+        var old = byI[it.id]; if (!old || old.del || glSig(old) !== glSig(it)) put(it);
+      });
+      R.forEach(function (i) { if (i.by === me && !i.del && !seen[i.id] && gone[i.id]) put({ id: i.id, del: true, by: me }); });
+      var ap = glApply(g, out, me);
+      if (ap) { glQuiet = true; save(); glQuiet = false; renderAll(); } else { glQuiet = true; save(); glQuiet = false; }
+      if (!changed) return;
+      return api("PATCH", "/rest/v1/shared_state?space_id=eq." + g.gl + "&rev=eq." + row.rev, { data: { kind: "group", name: g.name, items: out }, rev: row.rev + 1, updated_at: new Date().toISOString(), updated_by: me }, tk, "return=representation").then(function (p) {
+        if (p.ok && p.json && p.json.length === 1) return;
+        if (p.status === 401) { dropAuth(); throw { code: "noauth" }; }
+        if (p.ok || p.status === 409) { if (depth < 3) return glSync(g, depth + 1); return; }
+        throw { code: "srv" };
+      });
+    });
+  }
+  function glRunAll() {
+    if (glBusy || !glOn() || !glAny()) return Promise.resolve();
+    glBusy = true;
+    var list = state.groups.filter(function (g) { return g.gl; }), p = Promise.resolve();
+    list.forEach(function (g) { p = p.then(function () { if (g.gl && sp.cur === "p") return glSync(g); }); });
+    return p.then(function () { glBusy = false; }, function () { glBusy = false; });
+  }
+  /* gruppo creato da un'altra persona: lo creo anche da me */
+  function glIncoming(s, row, tk) {
+    if (sp.cur !== "p") return Promise.resolve();
+    glKnown[s.id] = 1;
+    if (state.groups.some(function (g) { return g.gl === s.id; })) return Promise.resolve();
+    return api("GET", "/rest/v1/shared_members?select=user_id,email&space_id=eq." + s.id, null, tk).then(function (r) {
+      if (sp.cur !== "p") { delete glKnown[s.id]; return; }
+      var nm = String(s.name || "Gruppo").slice(0, 40);
+      if (state.groups.some(function (x) { return x.name.toLowerCase() === nm.toLowerCase(); })) nm = (nm.slice(0, 30) + " (account)");
+      var g = { id: uid(), name: nm, pids: [], tagId: "", closed: false, due: "", gl: s.id, mem: {} };
+      (r.json || []).forEach(function (m) { g.mem[m.user_id] = m.email; });
+      state.groups.push(g); ensureGroupTag(g);
+      Object.keys(g.mem).forEach(function (u) { if (u !== cl.auth.uid) glPerson(g, u); });
+      save(); renderAll(); toast("Nuovo gruppo con te: «" + nm + "»");
+      return glSync(g);
+    });
+  }
+  function glHTML(g) {
+    var h = '<div class="eq" id="glBox"><p><b>Gruppo con account</b></p>';
+    if (!cloudOn || !cl.auth) return h + '<p class="small muted">Funziona dal sito vero, dopo l\'accesso.</p></div>';
+    if (g.gl) {
+      var mem = g.mem || {}, names = Object.keys(mem).filter(function (u) { return u !== cl.auth.uid; }).map(function (u) { return mem[u]; });
+      h += '<p class="small">Collegato' + (names.length ? " con: " + esc(names.join(", ")) : "") + '. Le spese e i saldi che inserisci compaiono come debito/credito anche nell\'app dell\'altra persona, e viceversa. Ognuno modifica solo ciò che ha inserito lui.</p>';
+    } else h += '<p class="small muted">Collega il gruppo agli account: una spesa che inserisci qui diventa debito per l\'altra persona, e viceversa. Serve che l\'altra persona abbia già un account.</p>';
+    h += '<div class="field"><label for="glMail">' + (g.gl ? "Invita un\'altra persona (email)" : "Email dell\'altra persona") + '</label><input id="glMail" type="email" inputmode="email" autocapitalize="none" placeholder="nome@esempio.it"></div><p class="err" id="glErr" role="alert"></p><button class="btn" type="button" id="glGo">' + (g.gl ? "Invita" : "Collega e invita") + "</button>";
+    if (g.gl) h += '<button class="btn ghost small" type="button" id="glNow">Aggiorna ora</button><button class="btn ghost small" type="button" id="glOff">Scollega</button>';
+    return h + "</div>";
+  }
+  function glWire(g) {
+    var go = $("glGo"); if (!go) return;
+    function er(t) { var e = $("glErr"); if (e) e.textContent = t; }
+    go.addEventListener("click", function () {
+      var mail = ($("glMail").value || "").trim();
+      if (!/^\S+@\S+\.\S+$/.test(mail)) { er("Scrivi un'email valida."); return; }
+      er(""); go.disabled = true; save();
+      var p = g.gl ? Promise.resolve(g.gl) : shRpc("create_shared_space", { p_name: g.name, p_data: { kind: "group", name: g.name, items: [] } }).then(function (r) { if (!r.ok || typeof r.json !== "string") throw r; g.gl = r.json; glKnown[g.gl] = 1; save(); return g.gl; });
+      p.then(function (id) { return shRpc("add_space_member", { p_space: id, p_email: mail }); }).then(function (r) {
+        if (!r.ok) throw r;
+        return glSync(g);
+      }).then(function () { toast("Gruppo collegato"); closeSheet(); renderAll(); openGroup(g.id); }, function (r) { go.disabled = false; er(shErr(r)); });
+    });
+    if ($("glNow")) $("glNow").addEventListener("click", function () { toast("Aggiorno…"); glSync(g).then(function () { toast("Gruppo aggiornato"); closeSheet(); openGroup(g.id); }, function () { toast("Non riesco ad aggiornare ora"); }); });
+    if ($("glOff")) twoTap($("glOff"), function () { delete g.gl; delete g.mem; save(); closeSheet(); renderAll(); toast("Gruppo scollegato: le spese restano qui"); }, "Tocca ancora per scollegare");
+  }
+  setInterval(function () { if (!document.hidden && cloudOn && cl.auth) shRefresh(false); }, 45000);
 
   function ensureGate() {
     var g = $("gate"); if (g) return g;
@@ -5631,7 +5963,7 @@ var M = (function () {
     } else if (a === "outForce") doLogout();
   }
   document.addEventListener("click", function (ev) { var t = ev.target.closest && ev.target.closest("[data-cl]"); if (t) { ev.preventDefault(); clClick(t.getAttribute("data-cl")); } });
-  document.addEventListener("visibilitychange", function () { if (!document.hidden && cloudOn && cl.auth) { syncNow(false); if (sp.list.length) shRefresh(false); } });
+  document.addEventListener("visibilitychange", function () { if (!document.hidden && cloudOn && cl.auth) { syncNow(false); shRefresh(false); } });
   window.addEventListener("online", function () { if (cloudOn && cl.auth) syncNow(false); });
   onSave = function () {
     if (!cloudOn || !cl.auth) return;
