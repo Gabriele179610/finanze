@@ -216,6 +216,32 @@ input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--accent);
 #mForm #g-acc, #mForm #g-xfer { border-left: 4px solid var(--bar); }
 #mForm #g-split { border-left: 4px solid var(--accent); }
 #mForm > button[type="submit"] { position: sticky; bottom: 8px; z-index: 2; min-height: 54px; font-size: 1.05rem; box-shadow: 0 8px 20px rgba(0,0,0,0.28); }
+.cchip { display: inline-flex; align-items: center; gap: 7px; }
+.cchip i { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+.catchips { max-height: 210px; overflow-y: auto; padding: 2px 0; }
+.subchips { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); }
+.schip { min-height: 36px; font-size: 0.85rem; }
+.nlist, #newsBody ul { padding-left: 20px; margin: 6px 0 10px; }
+.nlist li, #newsBody li { margin-bottom: 6px; }
+.guide .accd > summary .ic { margin-right: 10px; }
+.cic { --cc: var(--accent); display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; flex: none; background: color-mix(in srgb, var(--cc) 17%, transparent); color: var(--cc); }
+.cic svg { width: 56%; height: 56%; }
+.cic.sm { width: 26px; height: 26px; border-radius: 8px; margin-right: 8px; vertical-align: middle; }
+.cic.lg { width: 52px; height: 52px; border-radius: 16px; }
+.cat-top .cn { display: flex; align-items: center; }
+.catprev { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.icogrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; max-height: 230px; overflow-y: auto; padding: 2px; }
+.icob { aspect-ratio: 1; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); border-radius: 12px; display: grid; place-items: center; cursor: pointer; }
+.icob svg { width: 55%; height: 55%; }
+.icob[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.colrow { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.colb { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--line); cursor: pointer; }
+.colb[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--ink); }
+.catchips { display: grid !important; grid-template-columns: repeat(3, 1fr); gap: 8px; max-height: 300px; }
+.cchip { flex-direction: column; justify-content: flex-start; height: auto; min-height: 84px; padding: 9px 4px 7px; border-radius: 16px; gap: 6px; text-align: center; line-height: 1.15; font-size: 0.74rem; }
+.cchip span:last-child { overflow-wrap: break-word; max-width: 100%; }
+.cchip .cic { width: 40px; height: 40px; }
+.cchip[aria-pressed="true"] { background: var(--surface); box-shadow: inset 0 0 0 2px var(--accent); }
 .sbadge { display: inline-block; font-size: 0.68rem; font-weight: 800; line-height: 1; padding: 3px 5px; border-radius: 5px; background: var(--accent); color: var(--bg); vertical-align: middle; margin-left: 4px; }
 .pill { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
 .pill.acc { background: var(--accent-soft); color: var(--accent); }
@@ -794,6 +820,7 @@ if ("serviceWorker" in navigator) window.addEventListener("load", function () { 
     <button class="mrow" data-go="fix" type="button"><span class="main"><b>Da sistemare</b><span class="small muted">Tag «To be defined», possibili doppioni, importi insoliti</span></span><span class="cnt num" id="fixCnt" hidden></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
     <button class="mrow" data-go="alr" type="button"><span class="main"><b>Centro avvisi</b><span class="small muted">Pagamenti in arrivo e scadenze</span></span><span class="cnt num" id="alrCnt" hidden></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
     <button class="mrow" data-go="help" type="button"><span class="main"><b>Guida</b><span class="small muted">Come funziona ogni parte dell'app</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+    <button class="mrow" data-go="news" type="button"><span class="main"><b>Novità</b><span class="small muted">Cosa è cambiato a ogni versione</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
     <button class="mrow" data-go="sav" type="button"><span class="main"><b>Risparmi</b><span class="small muted">Obiettivi collegati ai fondi e barre di avanzamento</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
     <button class="mrow" data-go="rec" type="button"><span class="main"><b>Movimenti ricorrenti</b><span class="small muted">Si ripetono da soli: settimana, mese, anno</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
     <button class="mrow" data-go="set" type="button"><span class="main"><b>Settaggi</b><span class="small muted">Categorie, conti, tag e backup</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
@@ -853,11 +880,12 @@ if ("serviceWorker" in navigator) window.addEventListener("load", function () { 
   <!-- GUIDA -->
   <section id="view-help" class="view" hidden>
     <div class="guide">
-    <div class="card"><h2>Guida</h2><p class="small muted">Tocca una voce per leggere come funziona. Parole semplici, niente tecnicismi.</p></div>
+    <div class="card"><h2>Guida</h2><p class="small muted">Tocca una voce per leggere come funziona. Parole semplici, niente tecnicismi.</p><div class="field"><label for="gSearch" class="sr">Cerca nella guida</label><input id="gSearch" type="search" placeholder="Cerca (es. fondi, persone, allegati)" autocomplete="off"></div><button class="btn ghost small" type="button" data-go="news">Cosa c'è di nuovo</button></div>
+    <p class="hint" id="gNone" hidden>Nessuna voce trovata. Prova con un'altra parola.</p>
     <details class="card accd"><summary><span class="st"><b>Per iniziare</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>L'app serve a tenere sotto controllo i tuoi soldi. Le cose da conoscere sono poche:</p><ul><li><b>Conti</b>: dove stanno i soldi (conto corrente, contanti, carta).</li><li><b>Categorie</b>: a cosa servono le spese (casa, cibo, viaggi…).</li><li><b>Movimenti</b>: ogni spesa, entrata o spostamento che registri.</li></ul><p>Per aggiungere un movimento premi il tasto <b>+</b> in basso a destra. Prima di tutto controlla in <b>Altro › Settaggi</b> che conti e categorie siano quelli giusti.</p></div></details>
     <details class="card accd"><summary><span class="st"><b>Registrare un movimento</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>Con il <b>+</b> scegli il tipo:</p><ul><li><b>Spesa</b>: soldi che escono.</li><li><b>Entrata</b>: stipendio o altri soldi che arrivano.</li><li><b>Rimborso/Reso</b>: soldi che ti tornano indietro per una spesa già fatta.</li><li><b>Trasferimento</b>: sposti soldi da un conto all'altro (non è una spesa).</li><li><b>Pagata da altri</b>: qualcuno ha pagato per te; non tocca i tuoi conti.</li><li><b>Credito / Debito</b>: soldi che hai prestato o che ti hanno prestato (vedi la sezione Crediti e debiti).</li></ul><p>Nelle spese puoi aggiungere <b>tag</b> (etichette libere, ad esempio «Vacanza») e una <b>nota</b> per i dettagli. La nota non conta nel controllo dei doppioni.</p></div></details>
     <details class="card accd"><summary><span class="st"><b>Modelli rapidi</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>Se fai spesso la stessa spesa (caffè, benzina), salvala come modello con il tasto <b>Salva come modello rapido</b>. Poi compare nella Panoramica e nel «+»: un tocco e il modulo è già compilato.</p></div></details>
-    <details class="card accd"><summary><span class="st"><b>Budget e fondi</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>Ogni categoria ha un <b>fondo</b>: una sorta di «salvadanaio» dove metti da parte i soldi per quella voce. Ogni mese assegni (allochi) una cifra ai fondi e le spese la consumano. Così vedi subito cosa puoi ancora spendere.</p><p>Nella scheda <b>Budget</b> trovi l'allocazione del mese; nella Panoramica la <b>Riconciliazione</b> ti dice se i soldi sui conti e nei fondi tornano.</p></div></details>
+    <details class="card accd"><summary><span class="st"><b>Budget e fondi</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>Ogni categoria ha un <b>fondo</b>: una sorta di «salvadanaio» dove metti da parte i soldi per quella voce. Ogni mese assegni (allochi) una cifra ai fondi e le spese la consumano. Così vedi subito cosa puoi ancora spendere.</p><p>Nella scheda <b>Budget</b> trovi l'allocazione del mese (è una previsione: i fondi si muovono quando premi «Alloca ai fondi», vedi più sotto); nella Panoramica la <b>Riconciliazione</b> ti dice se i soldi sui conti e nei fondi tornano.</p></div></details>
     <details class="card accd"><summary><span class="st"><b>Spese divise con altre persone</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>Quando paghi una spesa anche per altri (una cena, un regalo), accendi <b>Dividi con altre persone</b> nel modulo della spesa. Scegli chi ha pagato e come dividere: in parti uguali, per percentuale o per importo.</p><ul><li>La spesa conta nel tuo budget solo per <b>la tua parte</b>.</li><li>Il resto diventa un <b>credito</b> verso le persone (o un debito, se ha pagato un altro).</li></ul><p>In <b>Altro › Persone e saldi</b> vedi quanto ti devono o devi a ciascuno. Quando vi pareggiate premi <b>Registra un saldo</b>: sposta solo i soldi sul conto, non è né una spesa né un'entrata.</p></div></details>
     <details class="card accd"><summary><span class="st"><b>Gruppi</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>Un <b>gruppo</b> raccoglie le spese di un evento (vacanza, cena, casa). Si crea in Persone e saldi, oppure da un tag: nella scheda del tag accendi <b>È un gruppo di spesa</b>.</p><p>Nella scheda del gruppo vedi la spesa totale, la tua parte e i saldi di ognuno. <b>Salda tutto</b> registra in una volta tutte le restituzioni. Quando è tutto a zero puoi <b>chiudere</b> il gruppo: da quel momento il suo tag non si sceglie più nei nuovi movimenti, ma resta nelle statistiche.</p></div></details>
     <details class="card accd"><summary><span class="st"><b>Crediti e debiti (prestiti)</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>Servono per soldi prestati (<b>credito</b>: devono restituirli a te) o presi in prestito (<b>debito</b>: li devi restituire tu). Puoi indicare la persona, la scadenza e registrare le restituzioni anche a rate. I soldi di un prestito <b>non sono tuoi</b> e non contano come spesa o entrata.</p><p>Si trovano in <b>Persone e saldi</b>. Se colleghi il prestito a una persona, il suo saldo si somma a quello delle spese divise.</p></div></details>
@@ -865,8 +893,19 @@ if ("serviceWorker" in navigator) window.addEventListener("load", function () { 
     <details class="card accd"><summary><span class="st"><b>Da sistemare e avvisi</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p><b>Da sistemare</b> ti segnala cose da controllare: movimenti con tag «To be defined», possibili doppioni, importi insoliti, spese senza descrizione e i saldi fermi: soldi da dare o ricevere con una persona senza movimenti da tanto tempo (vale solo per le persone, non per i conti come Poste). Se una segnalazione non ti interessa, premi <b>Ignora</b>.</p><p>Il <b>Centro avvisi</b> ti ricorda pagamenti in arrivo, scadenze di prestiti e gruppi e quando fare il backup.</p></div></details>
     <details class="card accd"><summary><span class="st"><b>Grafici e simulazione</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>In <b>Grafici e simulazione</b> trovi: l'andamento mese per mese, il confronto tra due periodi, la simulazione dei fondi nei prossimi anni, le statistiche su persone e gruppi e il dettaglio per sottocategoria (tabella mese per mese o grafico di un mese).</p></div></details>
     <details class="card accd"><summary><span class="st"><b>Importare, esportare, backup</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>In <b>Settaggi</b> puoi importare le spese da un file CSV (quello che si apre con Excel) o esportarle. Fai ogni tanto un <b>backup</b>: è una copia dei tuoi dati che puoi ripristinare in caso di problemi.</p></div></details>
+    <details class="card accd"><summary><span class="st"><b>Persone con account (la S)</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>Una persona può avere un <b>account</b> sull'app, come tua moglie o la tua ragazza. Quando la crei (in Persone e saldi, nel modulo della spesa o in un gruppo) puoi scrivere la sua email; oppure apri la sua scheda e usa <b>Account Supabase</b>. Serve che abbia già un account.</p><ul><li>Accanto al nome vedi una <b>S</b>: vuol dire «ha un account».</li><li>Una spesa divisa con lei diventa un <b>debito</b> anche sul suo telefono, e il contrario.</li><li>Ognuno modifica o cancella solo ciò che ha inserito lui.</li></ul><p>Chi non ha un account (tua madre, un amico) resta una persona normale: tutto funziona solo sul tuo telefono.</p></div></details>
+    <details class="card accd"><summary><span class="st"><b>Approvare le spese degli altri</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>Le spese divise inserite da una persona con account arrivano in <b>Da sistemare</b>, con la sua categoria e sottocategoria.</p><ul><li><b>Da approvare</b>: hai la stessa categoria. Premi <b>Accetta</b> e la spesa entra nei tuoi movimenti con il debito.</li><li><b>Da rivedere</b> (triangolino giallo): la categoria o la sottocategoria non ce l'hai. Scegli dove metterla e poi accetta.</li><li><b>Rifiuta</b>: la spesa esce dalla tua lista e l'altra persona vede che non l'hai accettata. <b>Ignora</b> la mette da parte: la riprendi dal fondo della pagina.</li></ul></div></details>
+    <details class="card accd"><summary><span class="st"><b>Allocazione ai fondi e previsione</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>Il budget di un mese è una <b>previsione</b>: non muove i fondi. Quando arriva lo stipendio vai in <b>Budget › Mese</b> e premi <b>Alloca ai fondi</b>: l'app usa lo stipendio ricevuto e adatta le categorie in proporzione. Poi puoi correggere le cifre a mano.</p><p>Sotto trovi <b>Da allocare (conti − fondi)</b>: dopo l'allocazione dovrebbe essere zero.</p><p>Con <b>Previsione per tutto l'anno</b> scrivi uno stipendio ipotetico e crei i budget dei mesi che mancano. Restano previsioni che puoi cambiare mese per mese.</p></div></details>
+    <details class="card accd"><summary><span class="st"><b>Allegati e detraibili</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>In ogni movimento puoi aggiungere <b>allegati</b> (foto di scontrini o PDF). Sono salvati solo su questo telefono. Se la spesa è detraibile accendi <b>Detraibile</b>: finisce da sola nell'elenco delle spese detraibili, mentre gli allegati restano comunque dove li hai messi.</p></div></details>
+    <details class="card accd"><summary><span class="st"><b>Spazi condivisi</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>Uno <b>spazio</b> è un quaderno di conti separato dal tuo, che puoi condividere con altri account (per esempio i conti di casa). Tutti i membri vedono e modificano tutto. Si gestisce in <b>Settaggi › Spazi</b>. Le spese tra persone con account non usano gli spazi: usano la «S».</p></div></details>
+    <details class="card accd"><summary><span class="st"><b>Modifica in blocco</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>Nei <b>Movimenti</b> premi <b>Seleziona</b>, scegli le righe (o «Tutti») e cambia in una volta categoria, sottocategoria, conto, conto di destinazione (per gli spostamenti), tag, oppure elimina.</p></div></details>
+    <details class="card accd"><summary><span class="st"><b>Icone e colori delle categorie</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>Ogni categoria ha un'<b>icona</b> e un <b>colore</b>. Li scegli in <b>Settaggi › Categorie</b>, aprendo la categoria: c'è una griglia di icone e una fila di colori. Se non scegli nulla, l'app ne propone una in base al nome.</p><p>Li ritrovi quando scegli la categoria in un movimento, nell'elenco dei movimenti e nella Panoramica.</p></div></details>
     <details class="card accd"><summary><span class="st"><b>Personalizzare l'app</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>In <b>Settaggi › Funzioni</b> puoi scegliere un livello di partenza: <b>Base</b> (solo spese ed entrate, quanto hai speso e guadagnato nel mese), <b>Intermedio</b> o <b>Completo</b>. Poi accendi o spegni ogni singola parte: conti, categorie, sottocategorie, budget, tag, note, modelli, ricorrenti, risparmi, persone, prestiti, avvisi, grafici. I dati restano sempre salvati e puoi riaccendere tutto quando vuoi. In <b>Parametri</b> regoli soglie e giorni di preavviso. In <b>Privacy</b> puoi nascondere i saldi.</p></div></details>
     </div>
+  </section>
+
+  <section id="view-news" class="view" hidden>
+    <div id="newsBody" class="view"></div>
   </section>
 
   <!-- PERSONE -->
@@ -1426,7 +1465,7 @@ var M = (function () {
   "use strict";
 
   /* ============ Costanti ============ */
-  var APP_VERSION = "38 (19 nov 2026, 22:15)";
+  var APP_VERSION = "40 (20 nov 2026, 17:30)";
   var KEY3 = "mie-finanze-v3", KEY2 = "mie-finanze-v2", KEY1 = "mie-finanze-v1";
   var SAFE = "Spese di sicurezza";
   var CAT_DEFAULTS = ["Spese generiche", "Trasporti", "Investimenti", "Uscite", "Viaggi", "Casa", SAFE];
@@ -1442,8 +1481,8 @@ var M = (function () {
   var ACC_TYPES = ["Conto corrente", "Carta", "Contanti", "Risparmio", "Investimenti", "Altro"];
   var TYPES = [["expense", "Spesa"], ["income", "Entrata"], ["refund", "Rimborso/Reso"], ["transfer", "Trasferimento"], ["covered", "Pagata da altri"]];
   var FREQS = [["weekly", "Settimanale"], ["monthly", "Mensile"], ["quarterly", "Trimestrale"], ["semiannual", "Semestrale"], ["annual", "Annuale"]];
-  var TITLES = { home: "Panoramica", mov: "Movimenti", acc: "Conti", bud: "Budget", more: "Altro", sav: "Risparmi", rec: "Ricorrenti", set: "Settaggi", alr: "Avvisi", stats: "Grafici", fix: "Da sistemare", ppl: "Persone e saldi", help: "Guida" };
-  var PARENT = { sav: "more", rec: "more", set: "more", alr: "more", stats: "more", fix: "more", ppl: "more", help: "more" };
+  var TITLES = { home: "Panoramica", mov: "Movimenti", acc: "Conti", bud: "Budget", more: "Altro", sav: "Risparmi", rec: "Ricorrenti", set: "Settaggi", alr: "Avvisi", stats: "Grafici", fix: "Da sistemare", ppl: "Persone e saldi", help: "Guida", news: "Novità" };
+  var PARENT = { sav: "more", rec: "more", set: "more", alr: "more", stats: "more", fix: "more", ppl: "more", help: "more", news: "more" };
   var NOTE3 = "App aggiornata: ora ci sono i fondi per categoria, la riconciliazione, i prestiti e il centro avvisi. Vai in Budget › Fondi e guarda «Da allocare»: se non è zero, dai un saldo iniziale ai fondi (Altro › Settaggi › Modifica categoria) o assegna i soldi mancanti.";
 
   /* ============ Utilità ============ */
@@ -1490,7 +1529,71 @@ var M = (function () {
   function ico(name, tint, small) {
     return '<span class="ic ' + (tint || "t1") + (small ? " sm" : "") + '" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[name] || "") + "</svg></span>";
   }
-  var GO_ICO = { stats: ["chart", "t2"], alr: ["bell", "t4"], fix: ["checklist", "t4"], ppl: ["users", "t2"], help: ["checklist", "t3"], sav: ["target", "t1"], rec: ["repeat", "t5"], set: ["sliders", "t2"] };
+  /* ============ Icone e colori delle categorie (v40) ============ */
+  var CAT_PAL = ["#E5484D", "#F76B15", "#F5A524", "#46A758", "#12A594", "#0090FF", "#3E63DD", "#8E4EC6", "#D6409F", "#6E56CF", "#978365", "#687076"];
+  var CAT_ICO = {
+    car: '<path d="M3 17v-4l2-5h14l2 5v4h-3v-2H6v2z"/><path d="M3 13h18M7.5 14.5h.01M16.5 14.5h.01"/>',
+    bus: '<rect x="4" y="3" width="16" height="15" rx="3"/><path d="M4 11h16M8 18v3M16 18v3M8 15h.01M16 15h.01"/>',
+    train: '<rect x="5" y="3" width="14" height="14" rx="3"/><path d="M5 11h14M8 21l2-4M16 21l-2-4M9 14h.01M15 14h.01"/>',
+    bike: '<circle cx="6" cy="16" r="3.5"/><circle cx="18" cy="16" r="3.5"/><path d="M6 16l4-8h5l3 8M10 8H8M13 12H8"/>',
+    fuel: '<path d="M4 21V5a2 2 0 012-2h6a2 2 0 012 2v16M3 21h12M14 9h2a2 2 0 012 2v5a1.5 1.5 0 003 0V8l-3-3M7 8h4"/>',
+    plane: '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>',
+    banknote: ICONS.banknote, wallet: ICONS.wallet, card: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h3"/>',
+    coins: ICONS.coins, piggy: '<path d="M19 11c0-3-3-5-7-5S5 8 5 11c0 2 1 3 2 4v3h3v-1h4v1h3v-3c1-.5 2-2 2-4zM19 11h2v3h-2M9.5 10.5h.01"/>',
+    chart: ICONS.chart, trend: ICONS.trend, receipt: ICONS.receipt, shield: '<path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"/>',
+    home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
+    building: '<rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 7h.01M15 7h.01M9 11h.01M15 11h.01M10 21v-4h4v4"/>',
+    bolt: ICONS.bolt, flame: '<path d="M12 3c1 4 5 5 5 10a5 5 0 01-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-6 1-9z"/>', droplet: '<path d="M12 3s6 6.5 6 11a6 6 0 01-12 0c0-4.5 6-11 6-11z"/>',
+    wifi: '<path d="M2 9a15 15 0 0120 0M5.5 12.5a10 10 0 0113 0M9 16a5 5 0 016 0M12 20h.01"/>', phone: '<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>', laptop: '<rect x="4" y="5" width="16" height="11" rx="2"/><path d="M2 20h20"/>',
+    cart: '<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12h11L21 7H6"/>',
+    utensils: '<path d="M6 3v8a2 2 0 002 2v8M6 3v5M10 3v5M8 3v5"/><path d="M17 3c-2 2-3 4-3 7h3v11"/>',
+    coffee: '<path d="M4 8h12v6a5 5 0 01-5 5H9a5 5 0 01-5-5z"/><path d="M16 9h2a2.5 2.5 0 010 5h-2M7 3v2M11 3v2"/>',
+    glass: '<path d="M5 3h14l-7 9z"/><path d="M12 12v8M8 21h8"/>',
+    heart: '<path d="M12 20s-8-5-8-11a4.5 4.5 0 018-2.5A4.5 4.5 0 0120 9c0 6-8 11-8 11z"/>',
+    pill: '<rect x="3" y="9" width="18" height="6" rx="3" transform="rotate(-45 12 12)"/><path d="M8.5 8.5l7 7"/>',
+    dumbbell: '<path d="M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12"/>',
+    shirt: '<path d="M8 3L3 6l2 4 3-1v12h8V9l3 1 2-4-5-3a4 4 0 01-8 0z"/>',
+    scissors: '<circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8 7.5L20 18M8 16.5L20 6"/>',
+    sparkle: '<path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>',
+    gift: '<rect x="3" y="8" width="18" height="4"/><path d="M5 12v9h14v-9M12 8v13M12 8c-2-4-6-3-5 0 .5 1.5 3 1 5 0zM12 8c2-4 6-3 5 0-.5 1.5-3 1-5 0z"/>',
+    film: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 15h18M8 4v16M16 4v16"/>',
+    music: '<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>',
+    gamepad: '<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 10v5M4.5 12.5h5M16 11.5h.01M18.5 13.5h.01"/>',
+    book: '<path d="M4 4h6a2 2 0 012 2v14a2 2 0 00-2-2H4zM20 4h-6a2 2 0 00-2 2v14a2 2 0 012-2h6z"/>',
+    grad: '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/>',
+    briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2M3 13h18"/>',
+    paw: '<circle cx="6" cy="10" r="1.8"/><circle cx="10" cy="6" r="1.8"/><circle cx="14" cy="6" r="1.8"/><circle cx="18" cy="10" r="1.8"/><path d="M12 12c-3 0-5 3-5 5 0 2 2 2 5 1 3 1 5 1 5-1 0-2-2-5-5-5z"/>',
+    tree: '<path d="M12 21v-6M12 3l6 8h-3l4 6H5l4-6H6z"/>', umbrella: '<path d="M3 12a9 9 0 0118 0z"/><path d="M12 12v7a2 2 0 004 0"/>',
+    wrench: '<path d="M15 4a4.5 4.5 0 00-4 6L3.5 17.5a2 2 0 003 3L14 13a4.5 4.5 0 006-4l-3 3-3-1-1-3z"/>',
+    smile: '<circle cx="12" cy="12" r="9"/><path d="M8 14a4.5 4.5 0 008 0M9 9.5h.01M15 9.5h.01"/>',
+    camera: ICONS.camera, star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>', tag: '<path d="M3 12V4h8l10 10-8 8z"/><path d="M7.5 8h.01"/>', folder: ICONS.folder
+  };
+  var CAT_GUESS = [[/trasport|auto|macchin|benzin|carbur|veicol|moto/i, "car"], [/viagg|vacanz|volo|weekend|hotel/i, "plane"], [/gener|varie|altro/i, "banknote"], [/sicurezz|emergenz|imprevist/i, "shield"], [/casa|affitt|mutuo|condomin/i, "home"], [/aliment|supermerc|spesa|cibo/i, "cart"], [/ristor|cena|pranz|uscit|bar\b|aperitiv/i, "utensils"], [/salute|medic|farmac|dentist/i, "heart"], [/abbigl|vestit|scarpe/i, "shirt"], [/svago|tempo libero|cinema|intratt|hobby|gioc/i, "film"], [/telefon|internet|abbon|stream/i, "phone"], [/utenz|luce|gas\b|bolletta|energia/i, "bolt"], [/animal|cane|gatt/i, "paw"], [/istruz|scuola|corsi|formaz|univers/i, "grad"], [/sport|palestra|fitness/i, "dumbbell"], [/regal/i, "gift"], [/invest|etf|titoli|borsa/i, "chart"], [/risparm|accantonam/i, "piggy"], [/tasse|imposte|fisco/i, "receipt"], [/assicur/i, "shield"], [/bellez|cura|parrucch|estetic/i, "scissors"], [/lavoro|ufficio/i, "briefcase"], [/figli|bambin|famigl/i, "smile"]];
+  function catHash(s) { var h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; }
+  function catLook(c) {
+    if (typeof c === "string") c = byId(state.categories, c);
+    if (!c) return { icon: "tag", color: "#687076" };
+    var ic = c.icon && CAT_ICO[c.icon] ? c.icon : null;
+    if (!ic) { ic = "tag"; for (var i = 0; i < CAT_GUESS.length; i++) if (CAT_GUESS[i][0].test(c.name)) { ic = CAT_GUESS[i][1]; break; } }
+    return { icon: ic, color: c.color || CAT_PAL[catHash(c.name || c.id) % CAT_PAL.length] };
+  }
+  function catBadge(c, cls) {
+    var l = catLook(c);
+    return '<span class="cic ' + (cls || "") + '" style="--cc:' + l.color + '" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + CAT_ICO[l.icon] + "</svg></span>";
+  }
+  function catPickHTML(c) {
+    var l = catLook(c || { name: "", id: "" });
+    return '<div class="field"><span class="lbl">Icona e colore</span><div class="catprev"><span id="entPrev">' + catBadge(c ? c : { name: "", icon: l.icon, color: l.color }, "lg") + '</span><span class="small muted">Si vede nei movimenti, nei grafici e quando scegli la categoria.</span></div>' +
+      '<input type="hidden" id="entIcon" value="' + l.icon + '"><input type="hidden" id="entColor" value="' + l.color + '">' +
+      '<div class="icogrid" id="entIcons" role="group" aria-label="Icona">' + Object.keys(CAT_ICO).map(function (k) { return '<button type="button" class="icob" data-ic="' + k + '" aria-pressed="' + (k === l.icon) + '" aria-label="' + k + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + CAT_ICO[k] + "</svg></button>"; }).join("") + "</div>" +
+      '<div class="colrow" id="entCols" role="group" aria-label="Colore">' + CAT_PAL.map(function (k) { return '<button type="button" class="colb" data-col="' + k + '" style="background:' + k + '" aria-pressed="' + (k === l.color) + '" aria-label="Colore ' + k + '"></button>'; }).join("") + "</div></div>";
+  }
+  function catPickBind() {
+    function prev() { $("entPrev").innerHTML = catBadge({ icon: $("entIcon").value, color: $("entColor").value, name: "" }, "lg"); }
+    $("entIcons").addEventListener("click", function (e) { var b = e.target.closest("[data-ic]"); if (!b) return; $("entIcon").value = b.dataset.ic; Array.prototype.forEach.call($("entIcons").children, function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); }); prev(); });
+    $("entCols").addEventListener("click", function (e) { var b = e.target.closest("[data-col]"); if (!b) return; $("entColor").value = b.dataset.col; Array.prototype.forEach.call($("entCols").children, function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); }); prev(); });
+  }
+  var GO_ICO = { stats: ["chart", "t2"], alr: ["bell", "t4"], fix: ["checklist", "t4"], ppl: ["users", "t2"], help: ["checklist", "t3"], news: ["bolt", "t5"], sav: ["target", "t1"], rec: ["repeat", "t5"], set: ["sliders", "t2"] };
   var ACC_ICO = { cats: ["folder", "t1"], accs: ["wallet", "t2"], tags: ["hash", "t3"], csv: ["file", "t5"], sec: ["table", "t5"], priv: ["eyeoff", "t4"], tpl: ["bolt", "t3"], bk: ["archive", "t3"], acct: ["user", "t1"], par: ["sliders", "t4"], ft: ["checklist", "t2"], pp: ["user", "t1"], gr: ["users", "t3"], cr: ["banknote", "t1"], db: ["coins", "t4"], sp: ["space", "t7"], trash: ["trash", "t6"], ded: ["receipt", "t3"], home: ["layout", "t1"], tl: ["clock", "t2"] };
   var H2_ICO = [["Budget del mese", "gauge", "t1"], ["Spese per categoria", "pie", "t2"], ["Budget di", "calendar", "t1"], ["Stipendio e allocazione", "banknote", "t1"], ["Per categoria", "layers", "t2"], ["Riconciliazione", "balance", "t5"],
     ["Fondi per categoria", "coins", "t1"], ["Fondo per fondo", "coins", "t1"], ["Conti e fondi", "wallet", "t2"], ["I tuoi conti", "wallet", "t2"], ["Budget e spesa nel tempo", "chart", "t2"], ["Obiettivi dentro", "target", "t3"], ["I tuoi obiettivi", "target", "t3"],
@@ -1792,6 +1895,7 @@ var M = (function () {
     $("sampleBanner").hidden = !(state.sample && name === "home");
     if (name === "stats") renderStats();
     if (name === "ppl") renderPeople();
+    if (name === "news") renderNews();
     if (name === "home") renderHomeBal();
     window.scrollTo(0, 0);
   }
@@ -1933,9 +2037,9 @@ var M = (function () {
       var budget = r.a > 0
         ? '<div class="cap bud' + (over ? " over" : "") + '"><span>Budget usato: ' + nf.format(r.q) + " / " + nf.format(r.a) + '</span><b class="num">' + pct + '%</b></div><div class="track thin bud' + (over ? " over" : "") + '" role="img" aria-label="Budget usato ' + pct + '%"><div class="fill bud' + (over ? " over" : "") + '" style="width:' + Math.max(0, Math.min(100, (r.q / r.a) * 100)) + '%"></div></div>' + left
         : '<div class="cap"><span>Budget del mese</span><span>non allocato</span></div>';
-      return '<div><div class="catrow" role="button" tabindex="0" data-cat="' + esc(r.c) + '" aria-expanded="' + open + '"><div class="cat-top"><span>' + esc(catName(r.c)) + '</span><span class="amt num">' + nf.format(r.v) + '</span></div>' +
+      return '<div><div class="catrow" role="button" tabindex="0" data-cat="' + esc(r.c) + '" aria-expanded="' + open + '"><div class="cat-top"><span class="cn">' + catBadge(r.c, "sm") + esc(catName(r.c)) + '</span><span class="amt num">' + nf.format(r.v) + '</span></div>' +
         '<div class="cap"><span>Incidenza sul totale delle spese</span><b class="num">' + share + '%</b></div>' +
-        '<div class="track thin" role="img" aria-label="Incidenza ' + share + '%"><div class="fill" style="width:' + Math.max(r.v > 0 ? 3 : 0, (Math.max(r.v, 0) / max) * 100) + '%"></div></div>' + budget + (r.cv > 0.004 ? '<div class="cap"><span>Pagate da altri (non contate)</span><b class="num">' + nf.format(r.cv) + "</b></div>" : "") + '</div>' + det + "</div>";
+        '<div class="track thin" role="img" aria-label="Incidenza ' + share + '%"><div class="fill" style="background:' + catLook(r.c).color + ';width:' + Math.max(r.v > 0 ? 3 : 0, (Math.max(r.v, 0) / max) * 100) + '%"></div></div>' + budget + (r.cv > 0.004 ? '<div class="cap"><span>Pagate da altri (non contate)</span><b class="num">' + nf.format(r.cv) + "</b></div>" : "") + '</div>' + det + "</div>";
     }).join("");
   }
 
@@ -2041,7 +2145,8 @@ var M = (function () {
     if (m.recurId) pill += ' <span class="pill" title="Ricorrente">↻</span>';
     if (M.isSpread(m)) { var spm = +m.spread.months || 1, spd = +m.spread.delay || 0, spk = M.addMonthKey(m.date.slice(0, 7), spd); pill += ' <span class="pill acc">' + (spm > 1 ? "Spalmata su " + spm + " mesi" : "Imputata a " + MONTHS_IT[+spk.slice(5) - 1] + " " + spk.slice(0, 4)) + "</span>"; }
     var tg = (m.tagIds || []).map(tagName).filter(Boolean).map(function (n) { return '<span class="tagc">#' + esc(n) + "</span>"; }).join("");
-    return '<div class="item" role="button" tabindex="0" data-mov="' + esc(m.id) + '"><div class="main"><span class="t">' + esc(title) + " " + pill + '</span><span class="s">' + esc(sub) + "</span>" + (m.note ? '<span class="nt">' + esc(m.note) + "</span>" : "") + (tg ? '<span class="tg">' + tg + "</span>" : "") + "</div>" + amt + "</div>";
+    var cb = (m.catId && (m.type === "expense" || m.type === "refund" || m.type === "covered")) ? catBadge(m.catId) : "";
+    return '<div class="item" role="button" tabindex="0" data-mov="' + esc(m.id) + '">' + cb + '<div class="main"><span class="t">' + esc(title) + " " + pill + '</span><span class="s">' + esc(sub) + "</span>" + (m.note ? '<span class="nt">' + esc(m.note) + "</span>" : "") + (tg ? '<span class="tg">' + tg + "</span>" : "") + "</div>" + amt + "</div>";
   }
   var selMode = false, selSet = {};
   function renderMovements() {
@@ -2845,7 +2950,7 @@ var M = (function () {
   function dup(list, name, selfId, filter) { return list.some(function (x) { return x.id !== selfId && (!filter || filter(x)) && x.name.toLowerCase() === name.toLowerCase(); }); }
 
   function splitCategory(c, name) {
-    var today = todayISO(), n = { id: uid(), name: name, active: true, fundOpening: 0 }, subMap = {};
+    var today = todayISO(), n = { id: uid(), name: name, active: true, fundOpening: 0, icon: c.icon, color: c.color }, subMap = {};
     state.categories.push(n);
     subsOf(c.id).forEach(function (x) { if (x.active) { var ns = { id: uid(), catId: n.id, name: x.name, active: true }; state.subcategories.push(ns); subMap[x.id] = ns.id; } });
     state.recurring.forEach(function (r) {
@@ -2872,15 +2977,17 @@ var M = (function () {
       activeLabel: "Categoria attiva", activeHint: "Se la disattivi, non compare più nei nuovi movimenti e nel budget, ma lo storico resta com'è.",
       scopeInfo: c ? function () { return countUse(function (m) { return m.catId === c.id; }); } : null,
       scopeHint: "Con «solo nuovi» creo una categoria con il nuovo nome: le sottocategorie attive, le ripetizioni, il budget da questo mese in poi, gli obiettivi e i soldi del fondo passano lì. La vecchia categoria resta disattivata con il suo storico.",
-      extra: '<div class="field"><label for="entOpen">Saldo iniziale del fondo (€)</label><input id="entOpen" class="num" inputmode="decimal" placeholder="0,00" value="' + (c ? numStr(c.fundOpening || 0) : "") + '"></div><p class="hint">Quanto avevi già messo da parte per questa categoria prima di usare l\'app. Da qui il fondo cresce con le allocazioni e scende con le spese.</p>',
+      bind: function () { catPickBind(); },
+      extra: catPickHTML(c) + '<div class="field"><label for="entOpen">Saldo iniziale del fondo (€)</label><input id="entOpen" class="num" inputmode="decimal" placeholder="0,00" value="' + (c ? numStr(c.fundOpening || 0) : "") + '"></div><p class="hint">Quanto avevi già messo da parte per questa categoria prima di usare l\'app. Da qui il fondo cresce con le allocazioni e scende con le spese.</p>',
       onSave: function (v, scope) {
         if (!v.name) return "Scrivi il nome della categoria.";
         if (dup(state.categories, v.name, c && c.id)) return "Esiste già una categoria con questo nome.";
         var op = $("entOpen").value.trim() ? parseAmount($("entOpen").value) : 0;
         if (!isFinite(op)) return "Il saldo iniziale non è valido.";
+        var ic = $("entIcon").value, co = $("entColor").value;
         if (c && scope === "new" && v.name.toLowerCase() !== c.name.toLowerCase()) {
-          c.fundOpening = op; var nc = splitCategory(c, v.name); nc.active = v.active;
-        } else if (c) { c.name = v.name; c.active = v.active; c.fundOpening = op; } else state.categories.push({ id: uid(), name: v.name, active: v.active, fundOpening: op });
+          c.fundOpening = op; var nc = splitCategory(c, v.name); nc.active = v.active; nc.icon = ic; nc.color = co;
+        } else if (c) { c.name = v.name; c.active = v.active; c.fundOpening = op; c.icon = ic; c.color = co; } else state.categories.push({ id: uid(), name: v.name, active: v.active, fundOpening: op, icon: ic, color: co });
         return null;
       },
       canDelete: function () {
@@ -3309,6 +3416,27 @@ var M = (function () {
       $("mAmount").addEventListener("input", spSummary);
       bindTypeBar(function (v) { if (v === "expense" || v === "income" || v === "transfer" || v === "refund" || v === "covered") { cur.type = v; vis(); } else goType(v); });
       $("mCat").addEventListener("change", function () { $("mSub").innerHTML = optionsHTML($("mCat").value ? subItems($("mCat").value, "") : [], "", "Nessuna sottocategoria"); });
+      (function () {
+        var catEl = $("mCat"), subEl = $("mSub"); if (!catEl || !subEl) return;
+        catEl.classList.add("sr"); subEl.classList.add("sr");
+        var b1 = document.createElement("div"); b1.className = "chips catchips"; b1.id = "mCatChips"; catEl.parentNode.insertBefore(b1, catEl.nextSibling);
+        var b2 = document.createElement("div"); b2.className = "chips subchips"; b2.id = "mSubChips"; subEl.parentNode.insertBefore(b2, subEl.nextSibling);
+        var sig = "";
+        function hue(str) { var h = 0; for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) % 360; return h; }
+        function opts(el) { return Array.prototype.filter.call(el.options, function (o) { return o.value; }); }
+        function sync() {
+          var sg = catEl.value + "|" + subEl.value + "|" + catEl.options.length + "|" + subEl.options.length + "|" + catEl.innerHTML.length + "|" + subEl.innerHTML.length;
+          if (sg === sig) return; sig = sg;
+          b1.innerHTML = opts(catEl).map(function (o) { return '<button type="button" class="chip cchip" data-cv="' + esc(o.value) + '" aria-pressed="' + (o.value === catEl.value) + '">' + catBadge(o.value) + "<span>" + esc(o.textContent) + "</span></button>"; }).join("");
+          var so = opts(subEl); b2.hidden = !so.length; if (b2.parentNode) b2.parentNode.hidden = !so.length;
+          b2.innerHTML = so.map(function (o) { return '<button type="button" class="chip schip" data-sv="' + esc(o.value) + '" aria-pressed="' + (o.value === subEl.value) + '">' + esc(o.textContent) + "</button>"; }).join("");
+        }
+        function fire(el) { el.dispatchEvent(new Event("change", { bubbles: true })); sync(); }
+        b1.addEventListener("click", function (ev) { var c = ev.target.closest("[data-cv]"); if (!c) return; catEl.value = c.dataset.cv; fire(catEl); });
+        b2.addEventListener("click", function (ev) { var c = ev.target.closest("[data-sv]"); if (!c) return; subEl.value = subEl.value === c.dataset.sv ? "" : c.dataset.sv; fire(subEl); });
+        sync();
+        var iv = setInterval(function () { if (!document.body.contains(catEl)) { clearInterval(iv); return; } sync(); }, 250);
+      })();
       var tg = $("mTags");
       if (tg) tg.addEventListener("click", function (ev) {
         var b = ev.target.closest("button[data-mtag]"); if (!b) return;
@@ -6137,6 +6265,75 @@ var M = (function () {
     if (isDirty()) { setSt("dirty"); scheduleSync(); }
   };
 
+  /* ============ Novità e guida (v39) ============ */
+  var CHANGELOG = [
+    { v: 40, d: "20 nov 2026", t: "Icone e colori per le categorie", items: [
+      "Ogni categoria ha un'icona e un colore: li scegli in Settaggi › Categorie (modifica la categoria). Ci sono più di 40 icone e 12 colori.",
+      "Se non ne scegli, l'app ne propone una in base al nome (per esempio un'auto per Trasporti, un aereo per Viaggi).",
+      "Le icone si vedono nella scelta della categoria, nell'elenco movimenti e nella Panoramica (con le barre del colore della categoria)." ] },
+    { v: 39, d: "20 nov 2026", t: "Categorie a bottoncini, Novità e Guida nuova", items: [
+      "Nella scheda spesa le categorie e le sottocategorie sono bottoncini colorati: un tocco e hai scelto.",
+      "Nuova pagina «Novità» (Altro › Novità): qui leggi cosa cambia a ogni versione. Dopo un aggiornamento compare un avviso una volta sola.",
+      "La Guida ha le icone, una barra di ricerca e le sezioni nuove (persone con account, approvazione delle spese, allocazione ai fondi)." ] },
+    { v: 38, d: "19 nov 2026", t: "Scheda movimento più viva", items: [
+      "Spesa, entrata e spostamento hanno ognuno il suo colore.",
+      "L'importo è in alto, grande e al centro.",
+      "I campi sono in riquadri con una piccola icona, e il tasto Salva resta sempre visibile." ] },
+    { v: 37, d: "19 nov 2026", t: "Spese degli altri da approvare", items: [
+      "Le spese divise inserite da un'altra persona arrivano in «Da sistemare» con la sua categoria e sottocategoria: tu accetti o rifiuti.",
+      "Se la categoria o la sottocategoria non ce l'hai, la spesa ha il triangolino giallo e scegli tu dove metterla.",
+      "«Da sistemare» è a sezioni, con «Ignora» e «Ignora tutte»; le ignorate si riprendono dal fondo della pagina.",
+      "Modifica in blocco: ora anche per sottocategoria e per conto di destinazione." ] },
+    { v: 36, d: "19 nov 2026", t: "Persone con account", items: [
+      "Ogni persona può avere un account: lo colleghi dalla sua scheda (o mentre la crei) e vedi una «S» accanto al nome.",
+      "Una spesa divisa con lei diventa un debito anche sul suo telefono, e viceversa. Vale anche per i pagamenti di saldo.",
+      "Se la spesa è in un gruppo, il gruppo compare anche da lei." ] },
+    { v: 35, d: "19 nov 2026", t: "Fondi e previsione dell'anno", items: [
+      "Il budget del mese è una previsione: i fondi si muovono solo quando premi «Alloca ai fondi», dopo lo stipendio.",
+      "«Previsione per tutto l'anno»: crei in un colpo i budget dei mesi che mancano partendo da uno stipendio ipotetico.",
+      "In Settaggi il Cestino è subito sotto Spazi." ] },
+    { v: 34, d: "19 nov 2026", t: "Gruppi con account", items: [ "Primo collegamento dei gruppi agli account (poi sostituito, dalla versione 36, dalle persone con account)." ] },
+    { v: 33, d: "19 nov 2026", t: "Conti e fondi nei Grafici", items: [
+      "«Conti e fondi nel tempo» è in Grafici, con una linea che mostra come cambiano.",
+      "Lì trovi anche «Allinea ai saldi reali di oggi»." ] },
+    { v: 32, d: "19 nov 2026", t: "Versioni precedenti", items: [
+      "Panoramica personalizzabile a riquadri (Settaggi › Panoramica).",
+      "Viaggio nel tempo: com'erano conti e fondi in un giorno preciso.",
+      "Spazi condivisi con altri account, allegati e spese detraibili, tema chiaro/scuro e testo grande, suggerimenti intelligenti nell'inserimento." ] }
+  ];
+  function newsCard(e, open) {
+    return '<details class="card accd"' + (open ? " open" : "") + '><summary><span class="st"><b>Versione ' + e.v + " · " + esc(e.t) + '</b><span class="small muted">' + esc(e.d) + '</span></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><ul>' + e.items.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul></div></details>";
+  }
+  function renderNews() {
+    $("newsBody").innerHTML = '<div class="card"><h2>Novità</h2><p class="small muted">Cosa è cambiato a ogni versione. Tu sei alla versione ' + parseInt(APP_VERSION, 10) + ".</p></div>" + CHANGELOG.map(function (e, i) { return newsCard(e, i === 0); }).join("");
+  }
+  function newsPopup() {
+    var cur = parseInt(APP_VERSION, 10), seen = null;
+    try { seen = localStorage.getItem("mie-finanze-seenver"); } catch (e) {}
+    try { localStorage.setItem("mie-finanze-seenver", String(cur)); } catch (e) {}
+    if (seen === null && state.sample) return;
+    var from = seen === null ? cur - 1 : parseInt(seen, 10);
+    if (!(from < cur) || !$("overlay").hidden) return;
+    var list = CHANGELOG.filter(function (e) { return e.v > from; }).slice(0, 3);
+    if (!list.length) return;
+    openSheet("Novità della versione " + cur, list.map(function (e) { return '<h3>' + esc(e.t) + '</h3><ul class="nlist">' + e.items.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>"; }).join("") + '<button class="btn" type="button" id="newsAll">Vedi tutte le novità</button>', function () {
+      $("newsAll").addEventListener("click", function () { closeSheet(); showTab("news"); });
+    });
+  }
+  var GUIDE_ICO = { "Per iniziare": ["checklist", "t3"], "Registrare un movimento": ["receipt", "t1"], "Modelli rapidi": ["bolt", "t3"], "Budget e fondi": ["coins", "t1"], "Spese divise con altre persone": ["users", "t2"], "Gruppi": ["users", "t2"], "Crediti e debiti (prestiti)": ["balance", "t4"], "Accollo il costo": ["balance", "t4"], "Da sistemare e avvisi": ["bell", "t4"], "Grafici e simulazione": ["chart", "t2"], "Importare, esportare, backup": ["archive", "t3"], "Personalizzare l'app": ["sliders", "t2"], "Icone e colori delle categorie": ["folder", "t1"], "Persone con account (la S)": ["user", "t2"], "Approvare le spese degli altri": ["checklist", "t4"], "Allocazione ai fondi e previsione": ["calendar", "t1"], "Allegati e detraibili": ["camera", "t5"], "Spazi condivisi": ["space", "t2"], "Modifica in blocco": ["layers", "t5"] };
+  function decorateGuide() {
+    Array.prototype.forEach.call(document.querySelectorAll("#view-help details.accd > summary"), function (s) {
+      if (s.querySelector(".ic")) return; var b = s.querySelector("b"), g = b && GUIDE_ICO[b.textContent.trim()]; if (g) s.insertAdjacentHTML("afterbegin", ico(g[0], g[1]));
+    });
+  }
+  function guideSearch(q) {
+    q = (q || "").trim().toLowerCase(); var any = false;
+    Array.prototype.forEach.call(document.querySelectorAll("#view-help details.accd"), function (d) {
+      var hit = !q || d.textContent.toLowerCase().indexOf(q) > -1; d.hidden = !hit; if (hit) any = true; if (q && hit) d.open = true; if (!q) d.open = false;
+    });
+    $("gNone").hidden = any;
+  }
+
   if (window.MutationObserver) new MutationObserver(decorateSoon).observe(document.body, { childList: true, subtree: true });
   /* ============ Avvio ============ */
   syncSpaceFunds(); renderSpaceBar();
@@ -6151,6 +6348,7 @@ var M = (function () {
     renderAll();
     showTab("home");
   }
+  decorateGuide(); $("gSearch").addEventListener("input", function () { guideSearch(this.value); }); setTimeout(newsPopup, 1500);
   if (window.claude && window.claude.use) {
     window.claude.use("downloads").then(function (x) { if (x) { dl = x; renderAll(); } }).catch(function () {});
   }
