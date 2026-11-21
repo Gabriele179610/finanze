@@ -422,6 +422,22 @@ h3 { font-size: 1rem; }
 .code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.78rem; background: var(--surface-2); border-radius: 10px; padding: 10px 12px; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; user-select: all; -webkit-user-select: all; }
 ul.rules { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 0.85rem; color: var(--ink-2); }
 
+/* ---- menu Altro a gruppi (v41) ---- */
+.mgroup { display: flex; flex-direction: column; gap: 8px; }
+.mgrp { font-family: var(--font-display); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-3); margin: 10px 4px 0; }
+.mgroup[hidden] { display: none; }
+.mrow.sx { display: none; }
+.mrow.mjump { display: none; }
+.mrow.mjump.on { display: flex; }
+#mJumps { display: none; }
+#mJumps.on { display: flex; }
+.setpan { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.setpan[hidden] { display: none; }
+#setSeg { margin-bottom: 2px; }
+#setSeg button { font-size: 0.85rem; line-height: 1.2; padding: 6px 8px; }
+#view-more .mrow { padding: 12px 14px; }
+#view-more .mrow .main { min-width: 0; }
+#view-more .mrow .small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* ---- sezioni espandibili (Settaggi) ---- */
 details.accd { display: block; padding: 0; }
 details.accd > summary, details.subacc > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; padding: 8px 16px; }
@@ -815,15 +831,41 @@ if ("serviceWorker" in navigator) window.addEventListener("load", function () { 
 
   <!-- ALTRO -->
   <section id="view-more" class="view" hidden>
-    <button class="mrow" data-go="stats" type="button"><span class="main"><b>Grafici e simulazione</b><span class="small muted">Mese per mese e fondi nei prossimi anni</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
-    <button class="mrow" data-go="ppl" type="button"><span class="main"><b>Persone e saldi</b><span class="small muted">Spese divise, prestiti, scadenze, gruppi</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
-    <button class="mrow" data-go="fix" type="button"><span class="main"><b>Da sistemare</b><span class="small muted">Tag «To be defined», possibili doppioni, importi insoliti</span></span><span class="cnt num" id="fixCnt" hidden></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
-    <button class="mrow" data-go="alr" type="button"><span class="main"><b>Centro avvisi</b><span class="small muted">Pagamenti in arrivo e scadenze</span></span><span class="cnt num" id="alrCnt" hidden></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
-    <button class="mrow" data-go="help" type="button"><span class="main"><b>Guida</b><span class="small muted">Come funziona ogni parte dell'app</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
-    <button class="mrow" data-go="news" type="button"><span class="main"><b>Novità</b><span class="small muted">Cosa è cambiato a ogni versione</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
-    <button class="mrow" data-go="sav" type="button"><span class="main"><b>Risparmi</b><span class="small muted">Obiettivi collegati ai fondi e barre di avanzamento</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
-    <button class="mrow" data-go="rec" type="button"><span class="main"><b>Movimenti ricorrenti</b><span class="small muted">Si ripetono da soli: settimana, mese, anno</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
-    <button class="mrow" data-go="set" type="button"><span class="main"><b>Settaggi</b><span class="small muted">Categorie, conti, tag e backup</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+    <div class="field msearch"><label for="mSearch" class="sr">Cerca nel menu</label><input id="mSearch" type="search" placeholder="Cerca (es. fondi, backup, tag)" autocomplete="off"></div>
+    <div class="mgroup"><div class="mgrp">Il tuo denaro</div>
+      <button class="mrow" data-kw="grafici simulazione andamento torta" data-go="stats" type="button"><span class="main"><b>Grafici e simulazione</b><span class="small muted">Mese per mese e fondi nei prossimi anni</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="mrow" data-kw="risparmi obiettivi" data-go="sav" type="button"><span class="main"><b>Risparmi</b><span class="small muted">Obiettivi collegati ai fondi e barre di avanzamento</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="mrow" data-kw="ricorrenti abbonamenti ripetuti" data-go="rec" type="button"><span class="main"><b>Movimenti ricorrenti</b><span class="small muted">Si ripetono da soli: settimana, mese, anno</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+    <div class="mgroup"><div class="mgrp">Persone</div>
+      <button class="mrow" data-kw="persone saldi prestiti gruppi debiti crediti" data-go="ppl" type="button"><span class="main"><b>Persone e saldi</b><span class="small muted">Spese divise, prestiti, scadenze, gruppi</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+    <div class="mgroup"><div class="mgrp">Controlli</div>
+      <button class="mrow" data-kw="sistemare doppioni to be defined" data-go="fix" type="button"><span class="main"><b>Da sistemare</b><span class="small muted">Tag «To be defined», possibili doppioni, importi insoliti</span></span><span class="cnt num" id="fixCnt" hidden></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="mrow" data-kw="avvisi scadenze pagamenti notifiche" data-go="alr" type="button"><span class="main"><b>Centro avvisi</b><span class="small muted">Pagamenti in arrivo e scadenze</span></span><span class="cnt num" id="alrCnt" hidden></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+    <div class="mgroup"><div class="mgrp">App</div>
+      <button class="mrow" data-kw="guida aiuto come funziona" data-go="help" type="button"><span class="main"><b>Guida</b><span class="small muted">Come funziona ogni parte dell'app</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="mrow" data-kw="novita versione cambiamenti" data-go="news" type="button"><span class="main"><b>Novità</b><span class="small muted">Cosa è cambiato a ogni versione</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="mrow" data-kw="cestino eliminati ripristina" data-go="trash" type="button"><span class="main"><b>Cestino</b><span class="small muted" id="trashSub">Movimenti eliminati, da ripristinare</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="mrow" data-kw="settaggi impostazioni" data-go="set" type="button"><span class="main"><b>Settaggi</b><span class="small muted">Categorie, conti, aspetto e backup</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+    <div class="mgroup" id="mJumps"><div class="mgrp">Vai direttamente a</div>
+      <button class="mrow mjump" data-kw="fondi allocazione stipendio previsione budget" data-go="bud" data-ic="coins:t1" type="button"><span class="main"><b>Fondi e allocazione</b><span class="small muted">Budget › Fondi</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="mrow mjump" data-kw="conti saldo carta contanti" data-go="acc" data-ic="wallet:t2" type="button"><span class="main"><b>Conti</b><span class="small muted">Saldi e movimenti per conto</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="mrow mjump" data-kw="categorie sottocategorie icone colori" data-go="set" data-settab="cat" data-ic="folder:t1" type="button"><span class="main"><b>Categorie e sottocategorie</b><span class="small muted">Icone, colori e fondi</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="mrow mjump" data-kw="tag etichette" data-go="set" data-settab="cat" data-ic="hash:t3" type="button"><span class="main"><b>Tag</b><span class="small muted">Etichette sui movimenti</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="mrow mjump" data-kw="modelli rapidi template" data-go="set" data-settab="cat" data-ic="bolt:t3" type="button"><span class="main"><b>Modelli rapidi</b><span class="small muted">Spese che ripeti spesso</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="mrow mjump" data-kw="spazi account cloud accesso condivisione supabase" data-go="set" data-settab="per" data-ic="user:t1" type="button"><span class="main"><b>Spazi e account</b><span class="small muted">Accesso, cloud, quaderni condivisi</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="mrow mjump" data-kw="schermata iniziale panoramica widget blocchi" data-go="set" data-settab="asp" data-ic="layout:t1" type="button"><span class="main"><b>Schermata iniziale</b><span class="small muted">Scegli i blocchi della Panoramica</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="mrow mjump" data-kw="privacy nascondi saldi importi" data-go="set" data-settab="asp" data-ic="eyeoff:t4" type="button"><span class="main"><b>Privacy</b><span class="small muted">Nascondi i saldi</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="mrow mjump" data-kw="funzioni parametri soglie tema" data-go="set" data-settab="asp" data-ic="sliders:t4" type="button"><span class="main"><b>Funzioni e parametri</b><span class="small muted">Accendi e spegni, soglie</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="mrow mjump" data-kw="backup esporta importa dati ripristino" data-go="set" data-settab="dat" data-ic="archive:t3" type="button"><span class="main"><b>Backup</b><span class="small muted">Esporta e importa i dati</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="mrow mjump" data-kw="csv excel importa esporta" data-go="set" data-settab="dat" data-ic="file:t5" type="button"><span class="main"><b>Importa / esporta CSV</b><span class="small muted">Da e verso Excel</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="mrow mjump" data-kw="detraibili scontrini dichiarazione redditi" data-go="set" data-settab="dat" data-ic="receipt:t3" type="button"><span class="main"><b>Detraibili e scontrini</b><span class="small muted">Spese detraibili dell'anno</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="mrow mjump" data-kw="aggiorna versione app" data-go="set" data-settab="dat" data-ic="bolt:t5" type="button"><span class="main"><b>Aggiorna l'app</b><span class="small muted">Versione e aggiornamento</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+    <p class="empty" id="mNone" hidden>Niente trovato. Prova con un'altra parola.</p>
   </section>
 
   <!-- RISPARMI -->
@@ -897,7 +939,8 @@ if ("serviceWorker" in navigator) window.addEventListener("load", function () { 
     <details class="card accd"><summary><span class="st"><b>Approvare le spese degli altri</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>Le spese divise inserite da una persona con account arrivano in <b>Da sistemare</b>, con la sua categoria e sottocategoria.</p><ul><li><b>Da approvare</b>: hai la stessa categoria. Premi <b>Accetta</b> e la spesa entra nei tuoi movimenti con il debito.</li><li><b>Da rivedere</b> (triangolino giallo): la categoria o la sottocategoria non ce l'hai. Scegli dove metterla e poi accetta.</li><li><b>Rifiuta</b>: la spesa esce dalla tua lista e l'altra persona vede che non l'hai accettata. <b>Ignora</b> la mette da parte: la riprendi dal fondo della pagina.</li></ul></div></details>
     <details class="card accd"><summary><span class="st"><b>Allocazione ai fondi e previsione</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>Il budget di un mese è una <b>previsione</b>: non muove i fondi. Quando arriva lo stipendio vai in <b>Budget › Mese</b> e premi <b>Alloca ai fondi</b>: l'app usa lo stipendio ricevuto e adatta le categorie in proporzione. Poi puoi correggere le cifre a mano.</p><p>Sotto trovi <b>Da allocare (conti − fondi)</b>: dopo l'allocazione dovrebbe essere zero.</p><p>Con <b>Previsione per tutto l'anno</b> scrivi uno stipendio ipotetico e crei i budget dei mesi che mancano. Restano previsioni che puoi cambiare mese per mese.</p></div></details>
     <details class="card accd"><summary><span class="st"><b>Allegati e detraibili</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>In ogni movimento puoi aggiungere <b>allegati</b> (foto di scontrini o PDF). Sono salvati solo su questo telefono. Se la spesa è detraibile accendi <b>Detraibile</b>: finisce da sola nell'elenco delle spese detraibili, mentre gli allegati restano comunque dove li hai messi.</p></div></details>
-    <details class="card accd"><summary><span class="st"><b>Spazi condivisi</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>Uno <b>spazio</b> è un quaderno di conti separato dal tuo, che puoi condividere con altri account (per esempio i conti di casa). Tutti i membri vedono e modificano tutto. Si gestisce in <b>Settaggi › Spazi</b>. Le spese tra persone con account non usano gli spazi: usano la «S».</p></div></details>
+    <details class="card accd"><summary><span class="st"><b>Il menu Altro e la ricerca</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>Il menu <b>Altro</b> ha le voci in gruppi: <b>Il tuo denaro</b>, <b>Persone</b>, <b>Controlli</b> e <b>App</b>. In alto la barra di ricerca ti porta subito alla voce o alla sezione che cerchi (anche dentro i Settaggi). Il <b>Cestino</b> è nel gruppo App. I <b>Settaggi</b> hanno 4 schede: Categorie e conti, Persone e condivisione, Aspetto, Dati e backup.</p></div></details>
+    <details class="card accd"><summary><span class="st"><b>Spazi condivisi</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>Uno <b>spazio</b> è un quaderno di conti separato dal tuo, che puoi condividere con altri account (per esempio i conti di casa). Tutti i membri vedono e modificano tutto. Si gestisce in <b>Settaggi › Persone e condivisione › Spazi</b>. Le spese tra persone con account non usano gli spazi: usano la «S».</p></div></details>
     <details class="card accd"><summary><span class="st"><b>Modifica in blocco</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>Nei <b>Movimenti</b> premi <b>Seleziona</b>, scegli le righe (o «Tutti») e cambia in una volta categoria, sottocategoria, conto, conto di destinazione (per gli spostamenti), tag, oppure elimina.</p></div></details>
     <details class="card accd"><summary><span class="st"><b>Icone e colori delle categorie</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>Ogni categoria ha un'<b>icona</b> e un <b>colore</b>. Li scegli in <b>Settaggi › Categorie</b>, aprendo la categoria: c'è una griglia di icone e una fila di colori. Se non scegli nulla, l'app ne propone una in base al nome.</p><p>Li ritrovi quando scegli la categoria in un movimento, nell'elenco dei movimenti e nella Panoramica.</p></div></details>
     <details class="card accd"><summary><span class="st"><b>Personalizzare l'app</b></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody"><p>In <b>Settaggi › Funzioni</b> puoi scegliere un livello di partenza: <b>Base</b> (solo spese ed entrate, quanto hai speso e guadagnato nel mese), <b>Intermedio</b> o <b>Completo</b>. Poi accendi o spegni ogni singola parte: conti, categorie, sottocategorie, budget, tag, note, modelli, ricorrenti, risparmi, persone, prestiti, avvisi, grafici. I dati restano sempre salvati e puoi riaccendere tutto quando vuoi. In <b>Parametri</b> regoli soglie e giorni di preavviso. In <b>Privacy</b> puoi nascondere i saldi.</p></div></details>
@@ -926,6 +969,11 @@ if ("serviceWorker" in navigator) window.addEventListener("load", function () { 
   <!-- SETTAGGI -->
   <section id="view-set" class="view" hidden>
     <div id="setBody" class="view"></div>
+  </section>
+
+  <!-- CESTINO -->
+  <section id="view-trash" class="view" hidden>
+    <div id="trashBody" class="view"></div>
   </section>
 </div>
 
@@ -1465,7 +1513,7 @@ var M = (function () {
   "use strict";
 
   /* ============ Costanti ============ */
-  var APP_VERSION = "40 (20 nov 2026, 17:30)";
+  var APP_VERSION = "41 (20 nov 2026, 20:30)";
   var KEY3 = "mie-finanze-v3", KEY2 = "mie-finanze-v2", KEY1 = "mie-finanze-v1";
   var SAFE = "Spese di sicurezza";
   var CAT_DEFAULTS = ["Spese generiche", "Trasporti", "Investimenti", "Uscite", "Viaggi", "Casa", SAFE];
@@ -1481,8 +1529,8 @@ var M = (function () {
   var ACC_TYPES = ["Conto corrente", "Carta", "Contanti", "Risparmio", "Investimenti", "Altro"];
   var TYPES = [["expense", "Spesa"], ["income", "Entrata"], ["refund", "Rimborso/Reso"], ["transfer", "Trasferimento"], ["covered", "Pagata da altri"]];
   var FREQS = [["weekly", "Settimanale"], ["monthly", "Mensile"], ["quarterly", "Trimestrale"], ["semiannual", "Semestrale"], ["annual", "Annuale"]];
-  var TITLES = { home: "Panoramica", mov: "Movimenti", acc: "Conti", bud: "Budget", more: "Altro", sav: "Risparmi", rec: "Ricorrenti", set: "Settaggi", alr: "Avvisi", stats: "Grafici", fix: "Da sistemare", ppl: "Persone e saldi", help: "Guida", news: "Novità" };
-  var PARENT = { sav: "more", rec: "more", set: "more", alr: "more", stats: "more", fix: "more", ppl: "more", help: "more", news: "more" };
+  var TITLES = { home: "Panoramica", mov: "Movimenti", acc: "Conti", bud: "Budget", more: "Altro", sav: "Risparmi", rec: "Ricorrenti", set: "Settaggi", alr: "Avvisi", stats: "Grafici", fix: "Da sistemare", ppl: "Persone e saldi", help: "Guida", news: "Novità", trash: "Cestino" };
+  var PARENT = { sav: "more", rec: "more", set: "more", alr: "more", stats: "more", fix: "more", ppl: "more", help: "more", news: "more", trash: "more" };
   var NOTE3 = "App aggiornata: ora ci sono i fondi per categoria, la riconciliazione, i prestiti e il centro avvisi. Vai in Budget › Fondi e guarda «Da allocare»: se non è zero, dai un saldo iniziale ai fondi (Altro › Settaggi › Modifica categoria) o assegna i soldi mancanti.";
 
   /* ============ Utilità ============ */
@@ -1593,17 +1641,17 @@ var M = (function () {
     $("entIcons").addEventListener("click", function (e) { var b = e.target.closest("[data-ic]"); if (!b) return; $("entIcon").value = b.dataset.ic; Array.prototype.forEach.call($("entIcons").children, function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); }); prev(); });
     $("entCols").addEventListener("click", function (e) { var b = e.target.closest("[data-col]"); if (!b) return; $("entColor").value = b.dataset.col; Array.prototype.forEach.call($("entCols").children, function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); }); prev(); });
   }
-  var GO_ICO = { stats: ["chart", "t2"], alr: ["bell", "t4"], fix: ["checklist", "t4"], ppl: ["users", "t2"], help: ["checklist", "t3"], news: ["bolt", "t5"], sav: ["target", "t1"], rec: ["repeat", "t5"], set: ["sliders", "t2"] };
+  var GO_ICO = { stats: ["chart", "t2"], alr: ["bell", "t4"], fix: ["checklist", "t4"], ppl: ["users", "t2"], help: ["checklist", "t3"], news: ["bolt", "t5"], sav: ["target", "t1"], rec: ["repeat", "t5"], set: ["sliders", "t2"], trash: ["trash", "t6"] };
   var ACC_ICO = { cats: ["folder", "t1"], accs: ["wallet", "t2"], tags: ["hash", "t3"], csv: ["file", "t5"], sec: ["table", "t5"], priv: ["eyeoff", "t4"], tpl: ["bolt", "t3"], bk: ["archive", "t3"], acct: ["user", "t1"], par: ["sliders", "t4"], ft: ["checklist", "t2"], pp: ["user", "t1"], gr: ["users", "t3"], cr: ["banknote", "t1"], db: ["coins", "t4"], sp: ["space", "t7"], trash: ["trash", "t6"], ded: ["receipt", "t3"], home: ["layout", "t1"], tl: ["clock", "t2"] };
   var H2_ICO = [["Budget del mese", "gauge", "t1"], ["Spese per categoria", "pie", "t2"], ["Budget di", "calendar", "t1"], ["Stipendio e allocazione", "banknote", "t1"], ["Per categoria", "layers", "t2"], ["Riconciliazione", "balance", "t5"],
     ["Fondi per categoria", "coins", "t1"], ["Fondo per fondo", "coins", "t1"], ["Conti e fondi", "wallet", "t2"], ["I tuoi conti", "wallet", "t2"], ["Budget e spesa nel tempo", "chart", "t2"], ["Obiettivi dentro", "target", "t3"], ["I tuoi obiettivi", "target", "t3"],
-    ["Nuovo obiettivo", "target", "t3"], ["Movimenti ricorrenti", "repeat", "t5"], ["Movimenti", "list", "t2"], ["Simulazione dei fondi", "trend", "t5"], ["Confronto tra periodi", "compare", "t2"], ["Centro avvisi", "bell", "t4"], ["Avvisi", "bell", "t4"], ["Modelli rapidi", "bolt", "t3"], ["Da sistemare", "checklist", "t4"], ["Persone", "users", "t2"], ["Gruppi", "users", "t2"], ["Saldi con le persone", "users", "t2"]];
+    ["Nuovo obiettivo", "target", "t3"], ["Movimenti ricorrenti", "repeat", "t5"], ["Movimenti", "list", "t2"], ["Simulazione dei fondi", "trend", "t5"], ["Confronto tra periodi", "compare", "t2"], ["Centro avvisi", "bell", "t4"], ["Avvisi", "bell", "t4"], ["Modelli rapidi", "bolt", "t3"], ["Da sistemare", "checklist", "t4"], ["Persone", "users", "t2"], ["Gruppi", "users", "t2"], ["Saldi con le persone", "users", "t2"], ["Cestino", "trash", "t6"]];
   // aggiunge le icone alle voci di menu e ai titoli delle schede (si ripete a ogni disegno, senza duplicare)
   var decoTimer = 0;
   function decorateSoon() { if (decoTimer) return; decoTimer = requestAnimationFrame(function () { decoTimer = 0; decorate(); }); }
   function decorate() {
     Array.prototype.forEach.call(document.querySelectorAll(".mrow[data-go]"), function (r) {
-      if (r.querySelector(":scope > .ic")) return; var g = GO_ICO[r.dataset.go]; if (g) r.insertAdjacentHTML("afterbegin", ico(g[0], g[1]));
+      if (r.querySelector(":scope > .ic")) return; var g = r.dataset.ic ? r.dataset.ic.split(":") : GO_ICO[r.dataset.go]; if (g) r.insertAdjacentHTML("afterbegin", ico(g[0], g[1]));
     });
     Array.prototype.forEach.call(document.querySelectorAll(".view h2"), function (h) {
       if (h.querySelector(".ic")) return; var t = h.textContent.trim();
@@ -1896,6 +1944,8 @@ var M = (function () {
     if (name === "stats") renderStats();
     if (name === "ppl") renderPeople();
     if (name === "news") renderNews();
+    if (name === "trash") renderTrash();
+    if (name === "more") menuFilter();
     if (name === "home") renderHomeBal();
     window.scrollTo(0, 0);
   }
@@ -2840,18 +2890,20 @@ var M = (function () {
 
   /* ============ Settaggi ============ */
   var setOpen = { pp: true };
+  var setTab = "cat";
+  var SET_TABS = [["cat", "Categorie e conti"], ["per", "Persone e condivisione"], ["asp", "Aspetto"], ["dat", "Dati e backup"]];
   document.addEventListener("toggle", function (ev) { var d = ev.target; if (d && d.tagName === "DETAILS" && d.dataset && d.dataset.k) setOpen[d.dataset.k] = d.open; }, true);
   function accd(key, title, sub, body) {
     var ai = ACC_ICO[key];
     return '<details class="card accd" data-k="' + key + '"' + (setOpen[key] ? " open" : "") + '><summary>' + (ai ? ico(ai[0], ai[1]) : "") + '<span class="st"><b>' + title + "</b>" + (sub ? '<span class="small muted">' + sub + "</span>" : "") + '</span><span class="chv" aria-hidden="true"></span></summary><div class="accbody">' + body + "</div></details>";
   }
   function renderSettings() {
-    var bal = balances(), h = "";
-    if (cloudOn && cl.auth && sp.cur === "p") h += accountSection();
-    h += accd("sp", "Spazi", curSpName(), spacesHTML());
-    h += accd("trash", "Cestino", plural((state.trash || []).length, "movimento", "movimenti"), trashHTML());
-    if (feat("receipts")) h += accd("ded", "Detraibili e scontrini", plural(dedList(dedY || todayISO().slice(0, 4)).length, "spesa", "spese") + " nel " + (dedY || todayISO().slice(0, 4)), dedHTML());
-    h += accd("home", "Schermata iniziale", plural(homeCfg().order.filter(function (k) { return homeCfg().on[k]; }).length, "blocco", "blocchi") + " attivi", homeCfgHTML());
+    var bal = balances(), h = "", P = { cat: "", per: "", asp: "", dat: "" };
+    P.per += '<div class="card"><h2>Persone</h2><p class="small muted">Le persone (con o senza account, la «S») e i gruppi si gestiscono in Persone e saldi.</p><button class="btn ghost small" type="button" data-go="ppl">Apri Persone e saldi</button></div>';
+    if (cloudOn && cl.auth && sp.cur === "p") P.per += accountSection();
+    P.per += accd("sp", "Spazi", curSpName(), spacesHTML());
+    if (feat("receipts")) P.dat += accd("ded", "Detraibili e scontrini", plural(dedList(dedY || todayISO().slice(0, 4)).length, "spesa", "spese") + " nel " + (dedY || todayISO().slice(0, 4)), dedHTML());
+    P.asp += accd("home", "Schermata iniziale", plural(homeCfg().order.filter(function (k) { return homeCfg().on[k]; }).length, "blocco", "blocchi") + " attivi", homeCfgHTML());
     var catBody = '<p class="small muted">Ogni categoria ha anche un fondo (con un saldo iniziale). Ogni sottocategoria appartiene a una categoria. Tocca una categoria per vedere le sue sottocategorie.</p>' + state.categories.map(function (c) {
       var subs = subsOf(c.id), k = "c:" + c.id;
       return '<details class="subacc" data-k="' + k + '"' + (setOpen[k] ? " open" : "") + '><summary><span class="st"><b' + (c.active ? "" : ' class="dim"') + ">" + esc(c.name) + (c.active ? "" : ' <span class="pill">Disattivata</span>') + '</b><span class="small muted">' + subs.length + (subs.length === 1 ? " sottocategoria" : " sottocategorie") + " · fondo " + bm(fundBal(c.id)) + '</span></span><span class="chv" aria-hidden="true"></span></summary><div class="accbody">' +
@@ -2859,24 +2911,24 @@ var M = (function () {
         subs.map(function (s) { return '<div class="setrow"><div class="main' + (s.active ? "" : " dim") + '"><span>' + esc(s.name) + (s.active ? "" : ' <span class="pill">Disattivata</span>') + '</span></div><button class="btn ghost small" type="button" data-edit="sub:' + esc(s.id) + '">Modifica</button></div>'; }).join("") +
         '<button class="linkbtn" type="button" data-new="sub:' + esc(c.id) + '">+ Sottocategoria in ' + esc(c.name) + "</button></div></details>";
     }).join("") + '<button class="btn" type="button" data-new="cat">+ Nuova categoria</button>';
-    h += accd("cats", "Categorie e sottocategorie", plural(state.categories.length, "categoria", "categorie") + " · " + plural(state.subcategories.length, "sottocategoria", "sottocategorie"), catBody);
+    P.cat += accd("cats", "Categorie e sottocategorie", plural(state.categories.length, "categoria", "categorie") + " · " + plural(state.subcategories.length, "sottocategoria", "sottocategorie"), catBody);
 
-    h += accd("accs", "Conti", plural(state.accounts.length, "conto", "conti"),
+    P.cat += accd("accs", "Conti", plural(state.accounts.length, "conto", "conti"),
       '<p class="small muted">Il saldo iniziale è quanto avevi sul conto prima del primo movimento registrato qui. I conti attivi compaiono subito nel menu «Conto» dei movimenti.</p>' +
       state.accounts.map(function (a) {
         return '<div class="setrow"><div class="main' + (a.active ? "" : " dim") + '"><b>' + esc(a.name) + (a.active ? "" : ' <span class="pill">Disattivato</span>') + '</b><span class="small muted">' + esc(a.type || "Conto") + " · saldo iniziale " + bm(a.opening || 0) + " · oggi " + bm(bal[a.id] || 0) + '</span></div><button class="btn ghost small" type="button" data-edit="acc:' + esc(a.id) + '">Modifica</button></div>';
       }).join("") + '<button class="btn" type="button" data-new="acc">+ Nuovo conto</button>');
 
-    h += accd("tags", "Tag", plural(state.tags.length, "tag", "tag"),
+    P.cat += accd("tags", "Tag", plural(state.tags.length, "tag", "tag"),
       '<p class="small muted">Etichette libere da mettere sui movimenti, anche più di una.</p>' +
       (state.tags.length ? '<div class="chips">' + state.tags.map(function (t) { return '<button class="chip" type="button" data-edit="tag:' + esc(t.id) + '"' + (t.active ? "" : ' style="opacity:.6"') + ">#" + esc(t.name) + (t.active ? "" : " · off") + "</button>"; }).join("") + "</div>" : '<p class="empty">Nessun tag ancora.</p>') +
       '<button class="btn" type="button" data-new="tag">+ Nuovo tag</button>');
 
-    h += accd("tpl", "Modelli rapidi", plural(state.templates.length, "modello", "modelli"),
+    P.cat += accd("tpl", "Modelli rapidi", plural(state.templates.length, "modello", "modelli"),
       '<p class="small muted">Spese o movimenti che ripeti spesso (caffè, spesa, benzina). Compaiono nella Panoramica e in cima al nuovo movimento: un tocco e il modulo è già compilato. Per crearne uno apri un movimento e premi «Salva come modello rapido».</p>' +
       (state.templates.length ? state.templates.map(function (t) { return '<div class="setrow"><div class="main"><b>' + esc(t.name) + '</b><span class="small muted">' + esc(movSub2(t)) + '</span></div><button class="btn ghost small" type="button" data-tpledit="' + esc(t.id) + '">Modifica</button></div>'; }).join("") : '<p class="empty">Nessun modello ancora.</p>'));
 
-    h += accd("csv", "Importa / esporta spese (CSV)", "Dal tuo Excel, in aggiunta o in sostituzione",
+    P.dat += accd("csv", "Importa / esporta spese (CSV)", "Dal tuo Excel, in aggiunta o in sostituzione",
       '<p class="small muted">Per portare qui le spese dal tuo Excel. Scegli se <b>aggiungerle</b> a quelle che hai già o se <b>sostituire</b> tutte le spese.</p>' +
       '<p class="small"><b>Prima riga del file (intestazione):</b></p><p class="code" id="csvHead">' + esc(CSV_COLS.join(";")) + '</p>' +
       '<ul class="rules"><li><b>data</b>: GG/MM/AAAA</li><li><b>tipo</b>: spesa, entrata, rimborso, trasferimento oppure saldo_iniziale</li><li><b>importo</b>: numero positivo, anche con la virgola (12,50)</li><li><b>conto</b>: nome del conto (se non esiste lo creo)</li><li><b>categoria</b> e <b>sottocategoria</b>: per spese e rimborsi</li><li><b>tag</b>: più tag separati da |</li><li><b>conto_destinazione</b>: solo per i trasferimenti</li><li><b>tipo_entrata</b>: «Stipendio» oppure vuoto</li><li><b>tipo</b> può essere anche «pagata_da_altri» (senza conto; in <b>pagato_da</b> scrivi chi ha pagato, facoltativo): non entra in conti, fondi e totali</li><li><b>note</b> (facoltativa): dettagli liberi sul movimento</li><li><b>spalma_mesi</b> e <b>spalma_da</b> (facoltativi, solo per le spese): su quanti mesi spalmare fondo e budget (1 = tutto in un mese) e da quando: «mese pagamento», «mese successivo» oppure un mese preciso come 2027-08</li></ul>' +
@@ -2886,7 +2938,7 @@ var M = (function () {
       (dl ? '<div class="btns"><button class="btn ghost small" type="button" id="csvTpl">Modello CSV</button><button class="btn ghost small" type="button" id="csvExp">Esporta i movimenti</button></div>' : "") +
       '<button class="btn danger" type="button" id="resetBtn">Azzera tutti i dati</button>');
 
-    h += accd("sec", "Saldi e budget (CSV)", "Conti, allocazioni, fondi",
+    P.dat += accd("sec", "Saldi e budget (CSV)", "Conti, allocazioni, fondi",
       '<p class="small muted">Tre file separati, da caricare quando vuoi. Non cancellano nulla: aggiornano solo le righe che contengono.</p>' +
       Object.keys(SECS).map(function (k) {
         var sc = SECS[k];
@@ -2894,24 +2946,52 @@ var M = (function () {
           '<div class="btns">' + (dl ? '<button class="btn ghost small" type="button" data-sec="tpl:' + k + '">Modello</button><button class="btn ghost small" type="button" data-sec="exp:' + k + '">Esporta</button>' : "") + '<button class="btn small" type="button" data-sec="imp:' + k + '">Importa</button><input type="file" id="secFile-' + k + '" data-secfile="' + k + '" accept=".csv,text/csv,text/plain" hidden></div>';
       }).join(""));
 
-    h += accd("ft", "Funzioni", ftCount(), ftSection());
-    h += accd("par", "Parametri", "Soglie e valori modificabili", parSection());
-    h += accd("priv", "Privacy", hideOn() ? "Saldi nascosti" : "Saldi visibili",
+    P.asp += accd("ft", "Funzioni", ftCount(), ftSection());
+    P.asp += accd("par", "Parametri", "Soglie e valori modificabili", parSection());
+    P.asp += accd("priv", "Privacy", hideOn() ? "Saldi nascosti" : "Saldi visibili",
       '<label class="switch"><input type="checkbox" id="hideSw"' + (hideOn() ? " checked" : "") + '><span>Nascondi i saldi di conti e fondi</span></label>' +
       '<p class="hint">I saldi dei conti e dei fondi (e i loro totali) diventano «' + MASK + '». Restano visibili spese, entrate, movimenti e quanto alloci ogni mese. Puoi cambiarlo anche dal tasto «Nascondi importi» nella scheda Conti.</p>');
 
     var lb = state.prefs.lastBackup;
-    h += accd("bk", "Backup dei dati", "Ultimo backup: " + (lb ? ago(lb) : "mai"),
+    P.dat += accd("bk", "Backup dei dati", "Ultimo backup: " + (lb ? ago(lb) : "mai"),
       '<p class="small muted">' + (cloudOn ? "I dati sono nel tuo account cloud e anche su questo telefono. Un backup in più, ogni tanto, non fa mai male." : "I dati sono salvati solo in questo browser. Se cancelli i dati del browser o cambi telefono si perdono: ogni tanto esporta un backup.") + '</p>' +
       '<p class="small">Ultimo backup: <b>' + (lb ? esc(ago(lb)) : "mai fatto") + '</b></p>' +
       '<div class="field"><label for="bkEvery">Ricordamelo ogni</label><select id="bkEvery">' + optionsHTML([{ v: "7", l: "7 giorni" }, { v: "14", l: "14 giorni" }, { v: "30", l: "30 giorni" }, { v: "0", l: "Mai" }], String(+state.prefs.backupEvery || 0)) + "</select></div>" +
       (dl ? '<button class="btn ghost" type="button" id="expBtn">Esporta backup</button>' : "") +
       '<button class="btn ghost" type="button" id="impBtn">Importa backup</button><input type="file" id="impFile" accept=".json,application/json" hidden>');
+    h = '<div class="seg seg2" id="setSeg" role="group" aria-label="Sezione dei settaggi">' + SET_TABS.map(function (t) { return '<button type="button" data-stab="' + t[0] + '" aria-pressed="' + (t[0] === setTab) + '">' + t[1] + "</button>"; }).join("") + "</div>" +
+      SET_TABS.map(function (t) { return '<div class="setpan" data-p="' + t[0] + '"' + (t[0] === setTab ? "" : " hidden") + ">" + P[t[0]] + "</div>"; }).join("");
     h += '<div class="verbox"><p class="small muted">Le mie finanze · versione ' + APP_VERSION + (window.FIN_CONFIG ? (cloudOn ? " · con cloud" : " · solo su questo telefono") : "") + '</p>' +
       (window.FIN_CONFIG ? '<button class="btn ghost small" type="button" id="appRefresh">Aggiorna l\'app</button><p class="hint">Se hai caricato una versione nuova e non la vedi, premi qui: scarica di nuovo l\'app senza toccare i tuoi dati.</p>' : "") + "</div>";
     $("setBody").innerHTML = h;
   }
 
+  function setTabGo(k) {
+    setTab = k;
+    Array.prototype.forEach.call(document.querySelectorAll("#setSeg [data-stab]"), function (b) { b.setAttribute("aria-pressed", b.dataset.stab === k ? "true" : "false"); });
+    Array.prototype.forEach.call(document.querySelectorAll("#setBody .setpan"), function (d) { d.hidden = d.dataset.p !== k; });
+  }
+  document.addEventListener("click", function (ev) {
+    var b = ev.target.closest && ev.target.closest("[data-stab]"); if (!b) return;
+    setTabGo(b.dataset.stab); window.scrollTo(0, 0);
+  });
+  /* ---- ricerca nel menu Altro ---- */
+  function normQ(x) { return String(x || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
+  function menuFilter() {
+    var q = normQ(($("mSearch") || {}).value).trim(), box = $("view-more"), any = false;
+    Array.prototype.forEach.call(box.querySelectorAll(".mrow"), function (r) {
+      var hit = !q || normQ(r.textContent + " " + (r.dataset.kw || "")).indexOf(q) > -1;
+      if (r.classList.contains("mjump")) r.classList.toggle("on", !!q && hit); else r.classList.toggle("sx", !hit);
+    });
+    Array.prototype.forEach.call(box.querySelectorAll(".mgroup"), function (g) {
+      var vis = false;
+      Array.prototype.forEach.call(g.querySelectorAll(".mrow"), function (r) { if (getComputedStyle(r).display !== "none") vis = true; });
+      if (g.id === "mJumps") g.classList.toggle("on", vis); else g.hidden = !vis;
+      if (vis) any = true;
+    });
+    $("mNone").hidden = any || !q;
+  }
+  document.addEventListener("input", function (ev) { if (ev.target && ev.target.id === "mSearch") menuFilter(); });
   function countUse(pred) { return state.movements.filter(pred).length + state.recurring.filter(function (r) { return pred(r.tpl); }).length; }
 
   function entitySheet(cfg) {
@@ -3975,14 +4055,20 @@ var M = (function () {
       return '<div class="setrow"><div class="main"><b>' + esc(movTitle(e.mov)) + '</b><span class="small muted">' + nf.format(e.mov.amount) + " · " + shortDate(e.mov.date) + " · eliminato il " + shortDate(e.at) + '</span></div><button class="btn ghost small" type="button" data-trs="' + esc(e.id) + '">Ripristina</button></div>';
     }).join("") + '<button class="btn danger" type="button" data-trs="all">Svuota il cestino</button>';
   }
+  function renderTrash() {
+    var n = (state.trash || []).length;
+    $("trashBody").innerHTML = '<div class="card"><h2>Cestino</h2>' + trashHTML() + "</div>";
+    $("trashSub").textContent = n ? plural(n, "movimento", "movimenti") + " da ripristinare" : "Vuoto: nessun movimento eliminato";
+    decorateSoon();
+  }
   document.addEventListener("click", function (ev) {
     var b = ev.target.closest && ev.target.closest("[data-trs]"); if (!b) return;
     var k = b.getAttribute("data-trs");
     if (k === "all") {
       if (!b.dataset.arm) { b.dataset.arm = "1"; var old = b.textContent; b.textContent = "Tocca ancora: cancello per sempre"; setTimeout(function () { delete b.dataset.arm; if (b.isConnected) b.textContent = old; }, 4000); return; }
-      state.trash = []; save(); renderSettings(); toast("Cestino svuotato"); return;
+      state.trash = []; save(); renderTrash(); toast("Cestino svuotato"); return;
     }
-    if (restoreMovement(k)) { save(); renderAll(); renderSettings(); toast("Movimento ripristinato"); }
+    if (restoreMovement(k)) { save(); renderAll(); toast("Movimento ripristinato"); }
   });
   function rememberSplit(spl) {
     if (!spl || !spl.inp) return;
@@ -5284,8 +5370,8 @@ var M = (function () {
     var stt = t.closest("[data-sttab]"); if (stt) { stTab = stt.dataset.sttab; stSel = -1; renderStats(); return; }
     var stb = t.closest("[data-stbar]"); if (stb) { var ix = +stb.dataset.stbar; stSel = stSel === ix ? -1 : ix; renderStats(); return; }
     var ck = t.closest("[data-chk]"); if (ck) { openCheck(ck.dataset.chk); return; }
-    if (t.closest("[data-backupnow]")) { if (dl) exportBackup(); else showTab("set"); return; }
-    var go = t.closest("[data-go]"); if (go) { showTab(go.dataset.go); return; }
+    if (t.closest("[data-backupnow]")) { if (dl) exportBackup(); else { setTabGo("dat"); showTab("set"); } return; }
+    var go = t.closest("[data-go]"); if (go) { if (go.dataset.settab) setTabGo(go.dataset.settab); else if (go.dataset.go === "set" && go.closest("#view-acc")) setTabGo("cat"); showTab(go.dataset.go); if (go.dataset.settab && $("mSearch")) { $("mSearch").value = ""; } return; }
     var mv = t.closest("[data-mov]"); if (mv) { if (selMode && t.closest("#movList")) { if (selSet[mv.dataset.mov]) delete selSet[mv.dataset.mov]; else selSet[mv.dataset.mov] = 1; renderMovements(); selUpd(); return; } openMovement(mv.dataset.mov); return; }
     var ed = t.closest("[data-edit]");
     if (ed) { var p = ed.dataset.edit.split(":"); if (p[0] === "cat") openCat(p[1]); else if (p[0] === "sub") openSub(p[1]); else if (p[0] === "acc") openAcc(p[1]); else if (p[0] === "tag") openTag(p[1]); return; }
@@ -5440,7 +5526,7 @@ var M = (function () {
     $("noticeBanner").hidden = !state.notice; $("noticeText").textContent = state.notice || "";
     $("warnBanner").hidden = storageOK;
     $("monthLabel").textContent = longMonth(view);
-    renderHome(); renderMovements(); renderAccounts(); renderBudget(); renderSavings(); renderRecurring(); renderLoans(); renderAlerts(); renderTpl(); renderFix(); renderPeople(); renderHomeBal(); renderSettings();
+    renderHome(); renderMovements(); renderAccounts(); renderBudget(); renderSavings(); renderRecurring(); renderLoans(); renderAlerts(); renderTpl(); renderFix(); renderPeople(); renderHomeBal(); renderSettings(); renderTrash();
     if (current === "stats") renderStats();
     applyFeat();
     decorate();
@@ -6267,6 +6353,11 @@ var M = (function () {
 
   /* ============ Novità e guida (v39) ============ */
   var CHANGELOG = [
+    { v: 41, d: "20 nov 2026", t: "Menu Altro più ordinato", items: [
+      "Il menu Altro ora ha dei gruppi con un titolo: Il tuo denaro, Persone, Controlli, App.",
+      "In alto c'è una barra di ricerca: scrivi per esempio «fondi», «backup» o «tag» e vai dritto lì.",
+      "Il Cestino è una voce a sé nel menu (non è più dentro i Settaggi).",
+      "I Settaggi sono divisi in 4 schede: Categorie e conti, Persone e condivisione, Aspetto, Dati e backup." ] },
     { v: 40, d: "20 nov 2026", t: "Icone e colori per le categorie", items: [
       "Ogni categoria ha un'icona e un colore: li scegli in Settaggi › Categorie (modifica la categoria). Ci sono più di 40 icone e 12 colori.",
       "Se non ne scegli, l'app ne propone una in base al nome (per esempio un'auto per Trasporti, un aereo per Viaggi).",
@@ -6320,7 +6411,7 @@ var M = (function () {
       $("newsAll").addEventListener("click", function () { closeSheet(); showTab("news"); });
     });
   }
-  var GUIDE_ICO = { "Per iniziare": ["checklist", "t3"], "Registrare un movimento": ["receipt", "t1"], "Modelli rapidi": ["bolt", "t3"], "Budget e fondi": ["coins", "t1"], "Spese divise con altre persone": ["users", "t2"], "Gruppi": ["users", "t2"], "Crediti e debiti (prestiti)": ["balance", "t4"], "Accollo il costo": ["balance", "t4"], "Da sistemare e avvisi": ["bell", "t4"], "Grafici e simulazione": ["chart", "t2"], "Importare, esportare, backup": ["archive", "t3"], "Personalizzare l'app": ["sliders", "t2"], "Icone e colori delle categorie": ["folder", "t1"], "Persone con account (la S)": ["user", "t2"], "Approvare le spese degli altri": ["checklist", "t4"], "Allocazione ai fondi e previsione": ["calendar", "t1"], "Allegati e detraibili": ["camera", "t5"], "Spazi condivisi": ["space", "t2"], "Modifica in blocco": ["layers", "t5"] };
+  var GUIDE_ICO = { "Per iniziare": ["checklist", "t3"], "Registrare un movimento": ["receipt", "t1"], "Modelli rapidi": ["bolt", "t3"], "Budget e fondi": ["coins", "t1"], "Spese divise con altre persone": ["users", "t2"], "Gruppi": ["users", "t2"], "Crediti e debiti (prestiti)": ["balance", "t4"], "Accollo il costo": ["balance", "t4"], "Da sistemare e avvisi": ["bell", "t4"], "Grafici e simulazione": ["chart", "t2"], "Importare, esportare, backup": ["archive", "t3"], "Personalizzare l'app": ["sliders", "t2"], "Icone e colori delle categorie": ["folder", "t1"], "Persone con account (la S)": ["user", "t2"], "Approvare le spese degli altri": ["checklist", "t4"], "Allocazione ai fondi e previsione": ["calendar", "t1"], "Allegati e detraibili": ["camera", "t5"], "Spazi condivisi": ["space", "t2"], "Modifica in blocco": ["layers", "t5"], "Il menu Altro e la ricerca": ["sliders", "t2"] };
   function decorateGuide() {
     Array.prototype.forEach.call(document.querySelectorAll("#view-help details.accd > summary"), function (s) {
       if (s.querySelector(".ic")) return; var b = s.querySelector("b"), g = b && GUIDE_ICO[b.textContent.trim()]; if (g) s.insertAdjacentHTML("afterbegin", ico(g[0], g[1]));
